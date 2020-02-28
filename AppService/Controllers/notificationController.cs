@@ -45,16 +45,6 @@ namespace AppService.Controllers
                     if (dbconn.checkToken(token, out userCardNo, out userAdminNo))
                     {
                         DataTable dt = dbconn.getTable(appServiceQry.getAppNotification(userCardNo));
-                        //if(dt.Rows.Count !=0)
-                        //{
-                        //    foreach
-                        //}
-                        //else
-                        //{
-                        //    response.isSuccess = false;
-                        //    response.resultCode = HttpStatusCode.NotFound.ToString();
-                        //    response.resultMessage = appConstantValues.MSG_NOFOUND;
-                        //}
                         List<notificationDetial> notis = new List<notificationDetial>();
                         foreach(DataRow item in dt.Rows)
                         {

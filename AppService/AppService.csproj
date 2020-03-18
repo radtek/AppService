@@ -137,6 +137,7 @@
     <Compile Include="Controllers\upgradeProductController.cs" />
     <Compile Include="Controllers\upgradeProductNewController.cs" />
     <Compile Include="Controllers\vodListController.cs" />
+    <Compile Include="Controllers\vodListWebController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

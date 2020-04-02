@@ -35,6 +35,8 @@ namespace AppService.Controllers
             defaultResponseModel response = new defaultResponseModel();
             try
             {
+                // new promo
+
                 LogWriter._promo(TAG, string.Format("[>>] Request: [{0}]", serializer.Serialize(injson)));
                 if(token == "YGHM9SHBC81LMR4G")
                 {

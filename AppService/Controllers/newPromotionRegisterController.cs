@@ -35,7 +35,7 @@ namespace AppService.Controllers
             defaultResponseModel response = new defaultResponseModel();
             try
             {
-                // new promo
+                // new promo--- this is ok
 
                 LogWriter._promo(TAG, string.Format("[>>] Request: [{0}]", serializer.Serialize(injson)));
                 if(token == "YGHM9SHBC81LMR4G")
@@ -104,5 +104,12 @@ namespace AppService.Controllers
             LogWriter._promo(TAG, string.Format("[<<] Ip: [{0}], Token: [{1}], Response: [{2}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), token, serializer.Serialize(response)));
             return message;
         }
+
+        //public HttpResponseMessage Get()
+        //{
+        //    //HttpResponseMessage = new HttpResponseMessage();
+        //    HttpResponseMessage response = new HttpResponseMessage() ;
+        //    return response;
+        //}
     }
 }

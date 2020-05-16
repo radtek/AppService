@@ -118,6 +118,7 @@
     <Compile Include="Controllers\chargeProductController.cs" />
     <Compile Include="Controllers\chatbotChargeProductController.cs" />
     <Compile Include="Controllers\chatbotGetCardNoController.cs" />
+    <Compile Include="Controllers\fbLoginController.cs" />
     <Compile Include="Controllers\getSalesCenterController.cs" />
     <Compile Include="Controllers\getUserInfoController.cs" />
     <Compile Include="Controllers\loginController.cs" />

@@ -147,37 +147,46 @@ namespace AppService.Controllers
                     string userAdminNo = string.Empty;
                     if (dbconn.checkToken(token, out userCardNo, out userAdminNo))
                     {
-                        localConvertProdcutMdl convProd = new localConvertProdcutMdl();
-                        convProd.BranchId = "286";
-                        convProd.Channel = "6";
-                        convProd.cardNo = userCardNo;
-                        convProd.ConvertProduct = toProductId;
-                        convProd.Pay_type = "1";
-                        convProd.Username = userAdminNo;
-                        string convJson = serializer.Serialize(convProd);
-                        string localResponse = string.Empty;
-                        if (httpUtil.httpCall_POST_local(convJson, "processProduct", out localResponse))
+                        if (checkCustomType(userCardNo))
                         {
-                            LogWriter._upgradeProduct(TAG, string.Format("Local Service Response: [{0}]", localResponse));
-                            var convObj = serializer.Deserialize<localCheckProductResponse>(localResponse);
-                            if (convObj.issuccess)
+                            localConvertProdcutMdl convProd = new localConvertProdcutMdl();
+                            convProd.BranchId = "286";
+                            convProd.Channel = "6";
+                            convProd.cardNo = userCardNo;
+                            convProd.ConvertProduct = toProductId;
+                            convProd.Pay_type = "1";
+                            convProd.Username = userAdminNo;
+                            string convJson = serializer.Serialize(convProd);
+                            string localResponse = string.Empty;
+                            if (httpUtil.httpCall_POST_local(convJson, "processProduct", out localResponse))
                             {
-                                response.isSuccess = true;
-                                response.resultCode = HttpStatusCode.OK.ToString();
-                                response.resultMessage = appConstantValues.MSG_SUCCESS;
+                                LogWriter._upgradeProduct(TAG, string.Format("Local Service Response: [{0}]", localResponse));
+                                var convObj = serializer.Deserialize<localCheckProductResponse>(localResponse);
+                                if (convObj.issuccess)
+                                {
+                                    response.isSuccess = true;
+                                    response.resultCode = HttpStatusCode.OK.ToString();
+                                    response.resultMessage = appConstantValues.MSG_SUCCESS;
+                                }
+                                else
+                                {
+                                    response.isSuccess = false;
+                                    response.resultCode = HttpStatusCode.NotFound.ToString();
+                                    response.resultMessage = "Багц ахиулалт амжилтгүй боллоо.";
+                                }
                             }
                             else
                             {
                                 response.isSuccess = false;
                                 response.resultCode = HttpStatusCode.NotFound.ToString();
-                                response.resultMessage = "Багц ахиулалт амжилтгүй боллоо.";
+                                response.resultMessage = "Дотоод сервис дуудахад алдаа гарлаа.";
                             }
                         }
                         else
                         {
                             response.isSuccess = false;
                             response.resultCode = HttpStatusCode.NotFound.ToString();
-                            response.resultMessage = "Дотоод сервис дуудахад алдаа гарлаа.";
+                            response.resultMessage = "Дараа төлбөрт хэрэглэгч багц ахиулах боломжгүй.";
                         }
                     }
                     else
@@ -205,6 +214,27 @@ namespace AppService.Controllers
             message = Request.CreateResponse(HttpStatusCode.OK, response);
             LogWriter._upgradeProduct(TAG, string.Format("[<<] IP: [{0}], Response: [{1}], Token: [{2}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), serializer.Serialize(response), token));
             return message;
+        }
+        private bool checkCustomType(string cardNo)
+        {
+            bool res = false;
+            try
+            {
+                DataTable dt = dbconn.getTable(appServiceQry.checkCard(cardNo));
+                if (dt.Rows.Count != 0)
+                {
+                    string type = dt.Rows[0]["IS_PREPAID"].ToString();
+                    if (type == "1")
+                    {
+                        res = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                exceptionManager.ManageException(ex, TAG);
+            }
+            return res;
         }
     }
 }

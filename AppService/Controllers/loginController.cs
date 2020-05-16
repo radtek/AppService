@@ -16,6 +16,7 @@ using System.Text;
 
 namespace AppService.Controllers
 {
+    [RoutePrefix("api/login")]
     public class loginController : ApiController
     {
         DBConnection dbconn = new DBConnection();
@@ -42,7 +43,7 @@ namespace AppService.Controllers
                 string[] clientSS = decodedStr.Split(':');
                 string clientId = clientSS[0];
                 string clientSecret = clientSS[1];
-                if(clientId == "A54FQFR46BD3U2C51D9PZ0QY8AXXC482")
+                if (clientId == "A54FQFR46BD3U2C51D9PZ0QY8AXXC482")
                 {
                     if (dbconn.idbCheck(out dbres))
                     {
@@ -119,7 +120,7 @@ namespace AppService.Controllers
                                 int expSeconds = Convert.ToInt32(TimeSpan.FromMinutes(expiryMinut).TotalSeconds.ToString());
                                 string authExpireDate = DateTime.Now.AddMinutes(expiryMinut).ToString(appConstantValues.DATE_TIME_FORMAT);
                                 string accessToken = string.Empty;
-                                if(dbconn.refreshToken(injson.refresh_token, cardno, authExpireDate, out accessToken))
+                                if (dbconn.refreshToken(injson.refresh_token, cardno, authExpireDate, out accessToken))
                                 {
                                     loginResp.access_token = accessToken;
                                     loginResp.refresh_token = injson.refresh_token;
@@ -157,9 +158,9 @@ namespace AppService.Controllers
                     message = Request.CreateResponse(HttpStatusCode.Unauthorized, authError);
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                authError.error= "invalid_request";
+                authError.error = "invalid_request";
                 authError.error_description = ex.Message;
                 exceptionManager.ManageException(ex, TAG);
                 message = Request.CreateResponse(HttpStatusCode.Unauthorized, authError);

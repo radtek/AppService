@@ -33,6 +33,16 @@ namespace AppServiceUtil.DBControl
             string qry = string.Format(@"SELECT  BB.PRODUCT_NAME_MON, AA.PRODUCT_ID, TO_CHAR(AA.END_DATE, 'YYYY-MM-DD HH24:MI:SS') AS ENDDATE, BB.ORDERING FROM ACCOUNT_SERVICE AA, PRODUCT_CATALOG BB WHERE AA.IS_ACTIVE=0 AND AA.CARD_NUMBER='{0}' AND AA.END_DATE > SYSDATE AND AA.PRODUCT_ID = BB.PRODUCT_ID", cardNo);
             return qry;
         }
+        public static string _registerFBUser(string cardNo, string adminNo, string fbId)
+        {
+            string qry = string.Format(@"INSERT INTO APP_FB_USER(CARD_NO, ADMIN_NO, FACEBOOK_ID) VALUES ('{0}', '{1}', '{2}')", cardNo, adminNo, fbId);
+            return qry;
+        }
+        public static string _getFBUser(string fbId)
+        {
+            string qry = string.Format(@"SELECT CARD_NO, ADMIN_NO FROM APP_FB_USER WHERE FACEBOOK_ID='{0}'", fbId);
+            return qry;
+        }
         public static string _checkRToken(string refreshToken)
         {
             string qry = string.Format(@"SELECT CARD_NO, PHONE_NO FROM APP_AUTH_REFRESH_TOKEN WHERE REFRESH_TOKEN = '{0}' AND EXPIRE_DATE>SYSDATE", refreshToken);
@@ -169,6 +179,11 @@ SELECT NOTI_ID, NOTIFICATION_NAME, NOTIFICATION_TEXT, NOTIFICATION_IMG_URL, TO_C
         public static string _getRefLive(string _cardNo)
         {
             string qry = string.Format(@"SELECT BB.CONTENT_NAME, AA.EVENT_ID, TO_CHAR(AA.ENDD, 'YYYY-MM-DD HH24:MI:SS') ENDTIME FROM (SELECT EVENT_ID, TO_DATE(END_TIME, 'YYYYMMDDHH24MISS') ENDD FROM D_PPV_EVENT WHERE CARD_NO='{0}' AND RESULT_YN != 'N' AND TO_DATE(END_TIME,'YYYYMMDDHH24MISS') >SYSDATE) AA, D_PPV_EVENT_ID_NAME BB WHERE BB.ID = AA.EVENT_ID", _cardNo);
+            return qry;
+        }
+        public static string checkCard(string sn)
+        {
+            string qry = string.Format("SELECT SUBSCRIBER_FNAME, CARD_NO, IS_PREPAID FROM T_DISH_CUSTOM WHERE SUBSCRIBER_STATUS=1 AND CARD_NO='{0}'", sn);
             return qry;
         }
     }

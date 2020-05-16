@@ -115,17 +115,26 @@ namespace AppService.Controllers
                         string resMon = string.Empty;
                         string resEng = string.Empty;
                         string resCry = string.Empty;
-                        if (dbconn.callARProcedure(userCardNo, contentId, beginDate, endDate, "0", userAdminNo, out resEng, out resMon, out resCry ))
+                        if (checkCustomType(userCardNo))
                         {
-                            response.isSuccess = true;
-                            response.resultCode = HttpStatusCode.OK.ToString();
-                            response.resultMessage = resMon;
+                            if (dbconn.callARProcedure(userCardNo, contentId, beginDate, endDate, "0", userAdminNo, out resEng, out resMon, out resCry))
+                            {
+                                response.isSuccess = true;
+                                response.resultCode = HttpStatusCode.OK.ToString();
+                                response.resultMessage = resMon;
+                            }
+                            else
+                            {
+                                response.isSuccess = false;
+                                response.resultCode = HttpStatusCode.NotFound.ToString();
+                                response.resultMessage = resMon;
+                            }
                         }
                         else
                         {
                             response.isSuccess = false;
                             response.resultCode = HttpStatusCode.NotFound.ToString();
-                            response.resultMessage = resMon;
+                            response.resultMessage = "Дараа төлбөрт хэрэглэгч захиалга хийх боломжгүй.";
                         }
                     }
                     else
@@ -154,6 +163,27 @@ namespace AppService.Controllers
             message = Request.CreateResponse(HttpStatusCode.OK, response);
             LogWriter._pushVod(TAG, string.Format("IP: [{0}], Request: [{1}], Response: [{2}], Token: [{3}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), contentId, serializer.Serialize(response), token));
             return message;
+        }
+        private bool checkCustomType(string cardNo)
+        {
+            bool res = false;
+            try
+            {
+                DataTable dt = dbconn.getTable(appServiceQry.checkCard(cardNo));
+                if (dt.Rows.Count != 0)
+                {
+                    string type = dt.Rows[0]["IS_PREPAID"].ToString();
+                    if (type == "1")
+                    {
+                        res = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                exceptionManager.ManageException(ex, TAG);
+            }
+            return res;
         }
     }
 }

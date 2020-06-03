@@ -70,10 +70,16 @@
     <Compile Include="DBControl\appServiceQry.cs" />
     <Compile Include="DBControl\chatbotQry.cs" />
     <Compile Include="DBControl\DBConnection.cs" />
+    <Compile Include="DBControl\DBControlNew.cs" />
+    <Compile Include="DBControl\tabletQuery.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TabletModel\LoginResponse.cs" />
+    <Compile Include="TabletModel\NotificationResponse.cs" />
+    <Compile Include="TabletModel\refreshServiceResponse.cs" />
     <Compile Include="Utils\additionalProductSelector.cs" />
     <Compile Include="Utils\appConstantValues.cs" />
     <Compile Include="Utils\convertors.cs" />
+    <Compile Include="Utils\correctionalFunc.cs" />
     <Compile Include="Utils\httpUtil.cs" />
     <Compile Include="Utils\LogWriter.cs" />
     <Compile Include="Utils\upgradeProductCalculator.cs" />

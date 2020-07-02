@@ -514,5 +514,90 @@ namespace AppServiceUtil.DBControl
             }
             return retValue;
         }
+        public bool chargeProduct(string _prodId, string _month, string _userName, string _amount, string _desc, string _cardNo)
+        {
+            bool retVal = false;
+            try
+            {
+                iOpen();
+                OracleCommand ocm = new OracleCommand("PKD_CHARGE_PRODUCT.chargeProduct_month_bank", conn);
+                ocm.CommandType = CommandType.StoredProcedure;
+                ocm.Parameters.Add("pproductId", OracleDbType.Int32, 30).Value = Convert.ToInt32(_prodId);
+                ocm.Parameters.Add("pmonth", OracleDbType.Int32, 30).Value = Convert.ToInt32(_month);
+                ocm.Parameters.Add("puser", OracleDbType.Varchar2, 100).Value = _userName;
+                ocm.Parameters.Add("pbranch", OracleDbType.Varchar2, 30).Value = "286";
+                ocm.Parameters.Add("pamount", OracleDbType.Decimal, 30).Value = Convert.ToDecimal(_amount);
+                ocm.Parameters.Add("pchannelType", OracleDbType.Varchar2, 30).Value = "6";
+                ocm.Parameters.Add("pcallType", OracleDbType.Int32, 30).Value = 9;
+                ocm.Parameters.Add("pdescription", OracleDbType.Varchar2, 500).Value = _desc;
+                ocm.Parameters.Add("pcardNumber", OracleDbType.Varchar2, 30).Value = _cardNo;
+                ocm.Parameters.Add("pproTypeId", OracleDbType.Int32, 30).Value = 3001;
+                ocm.Parameters.Add("ptransgroupid", OracleDbType.Varchar2, 30).Value = string.Empty;
+                ocm.Parameters.Add("pbankid", OracleDbType.Varchar2, 30).Value = string.Empty;
+                ocm.Parameters.Add("pOutTransId", OracleDbType.Varchar2, 100).Direction = ParameterDirection.Output;
+                ocm.Parameters.Add("pOutMsg", OracleDbType.Varchar2, 2000).Direction = ParameterDirection.Output;
+                ocm.ExecuteNonQuery();
+                iClose();
+                string res = string.Empty;
+                res = ocm.Parameters["pOutMsg"].Value.ToString();
+                if (res == "000")
+                {
+                    retVal = true;
+                }
+                else
+                {
+                    LogWriter._error(TAG, string.Format(@"ProResult:[{0}], CardNo:[{1}], Amount:[{2}]", res, _cardNo, _amount));
+                    retVal = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error(TAG, ex.ToString());
+                retVal = false;
+            }
+            return retVal;
+        }
+        public bool chargeAccount(string _cardNo, string _amount, string _userName, string _desc)
+        {
+            bool retVal = false;
+            try
+            {
+                iOpen();
+                OracleCommand ocm = new OracleCommand("PKD_COUNTER.add_counter_fromNumberUni1", conn);
+                ocm.CommandType = CommandType.StoredProcedure;
+                ocm.Parameters.Add("pcard_no", OracleDbType.Varchar2, 30).Value = _cardNo;
+                ocm.Parameters.Add("pcounter_id", OracleDbType.Varchar2, 30).Value = "1001";
+                ocm.Parameters.Add("pcounter_value", OracleDbType.Varchar2, 30).Value = _amount;
+                ocm.Parameters.Add("pexpire_date", OracleDbType.Date, 30).Value = null;
+                ocm.Parameters.Add("pupdate_user", OracleDbType.Varchar2, 100).Value = _userName;
+                ocm.Parameters.Add("pchannel", OracleDbType.Varchar2, 30).Value = "6";
+                ocm.Parameters.Add("pcalltype", OracleDbType.Varchar2, 30).Value = "1";
+                ocm.Parameters.Add("pdescription", OracleDbType.Varchar2, 500).Value = _desc;
+                ocm.Parameters.Add("pwithTrans", OracleDbType.Varchar2, 10).Value = "1";
+                ocm.Parameters.Add("pbranch", OracleDbType.Varchar2, 10).Value = "286";
+                ocm.Parameters.Add("pBankId", OracleDbType.Int32, 30).Value = null;
+                ocm.Parameters.Add("pTRANSGROUPID", OracleDbType.Varchar2, 30).Value = string.Empty;
+                ocm.Parameters.Add("pOutMsg", OracleDbType.Varchar2, 100).Direction = ParameterDirection.Output;
+                ocm.ExecuteNonQuery();
+                iClose();
+                string res = string.Empty;
+                res = ocm.Parameters["pOutMsg"].Value.ToString();
+                if (res == "000")
+                {
+                    retVal = true;
+                }
+                else
+                {
+                    retVal = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error(TAG, ex.ToString());
+                retVal = false;
+            }
+            return retVal;
+        }
+
     }
 }

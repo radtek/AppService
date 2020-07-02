@@ -43,8 +43,8 @@ namespace AppService.Controllers
                             string adminnumber = dt.Rows[0]["PHONE_NO"].ToString();
                             int expSeconds = Convert.ToInt32(TimeSpan.FromMinutes(2).TotalSeconds.ToString());
                             string authExpireDate = DateTime.Now.AddMinutes(2).ToString(appConstantValues.DATE_TIME_FORMAT);
-                            string authToken = tokenGenerator.tokenGen20(cardno);
-                            string refreshToken = tokenGenerator.tokenGen20(cardno);
+                            string authToken = tokenGenerator.generateToken(cardno);
+                            string refreshToken = tokenGenerator.generateToken(cardno);
                             //string commandResult = dbconn.iDBCommand(appServiceQry._registerToken(cardno, authToken, httpUtil.GetClientIPAddress(HttpContext.Current.Request), authExpireDate));
                             if (dbconn.registerToken(cardno, adminnumber, authToken, refreshToken, cip, authExpireDate))
                             {

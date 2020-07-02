@@ -115,5 +115,28 @@ namespace AppServiceUtil.Utils
             }
             return result.ToString();
         }
+        public static string replaceName(string ss)
+        {
+            string vvv = string.Empty;
+            for (int i = 0; i < ss.Length; i++)
+            {
+                if (i != 0)
+                {
+                    if (i == ss.Length - 1)
+                    {
+                        vvv = vvv + ss[i];
+                    }
+                    else
+                    {
+                        vvv = vvv + "*";
+                    }
+                }
+                else
+                {
+                    vvv = vvv + ss[i];
+                }
+            }
+            return vvv;
+        }
     }
 }

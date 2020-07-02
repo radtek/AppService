@@ -77,8 +77,8 @@ namespace AppService.Controllers
                                 {
                                     int expSeconds = Convert.ToInt32(TimeSpan.FromMinutes(expiryMinut).TotalSeconds.ToString());
                                     string authExpireDate = DateTime.Now.AddMinutes(expiryMinut).ToString(appConstantValues.DATE_TIME_FORMAT);
-                                    string authToken = tokenGenerator.tokenGen20(cardno);
-                                    string refreshToken = tokenGenerator.tokenGen20(cardno);
+                                    string authToken = tokenGenerator.generateToken(cardno);
+                                    string refreshToken = tokenGenerator.generateToken(cardno);
                                     //string commandResult = dbconn.iDBCommand(appServiceQry._registerToken(cardno, authToken, httpUtil.GetClientIPAddress(HttpContext.Current.Request), authExpireDate));
                                     if (dbconn.registerToken(cardno, adminnumber, authToken, refreshToken, cip, authExpireDate))
                                     {

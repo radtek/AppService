@@ -106,7 +106,7 @@ namespace AppServiceUtil.DBControl
             }
             catch (Exception ex)
             {
-                LogWriter._error(TAG, ex.ToString());
+                LogWriter._error(TAG, string.Format(@"SQL: {0}, Exception: {1}", qry, ex.ToString()));
                 dt.Clear();
             }
             return dt;

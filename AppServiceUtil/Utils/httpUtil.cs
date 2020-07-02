@@ -181,4 +181,148 @@ namespace AppServiceUtil.Utils
             return url;
         }
     }
+
+    public class httpWorker
+    {
+        public static bool httpCall_GET(string _urlPrefix, string _urlParam, string _token, out int statusCode, out string _response)
+        {
+            bool funcStatus = false;
+            _response = string.Empty;
+            statusCode = 0;
+            try
+            {
+                string url = string.Format(@"{0}/{1}", _urlPrefix, _urlParam); // Дуудах хаягийн дагуу ажиллуулах
+                //string url = "https://api.khanbank.com/v1/statements/5059050128"; // өнөөдрийн огноогоор хуулга татах
+                //LogWriter._statement("HttpWorker", url);
+                System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate (object sender1, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                                     | SecurityProtocolType.Tls11
+                                     | SecurityProtocolType.Tls12;
+                HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(string.Format(url));
+                httpRequest.Method = "GET";
+                httpRequest.ContentType = "application/json; encoding='utf-8'";
+                httpRequest.Timeout = 3 * 60 * 1000;
+                httpRequest.Headers["Authorization"] = _token;
+                string post_response = string.Empty;
+                HttpWebResponse osdresponse = (HttpWebResponse)httpRequest.GetResponseWithoutException();
+                statusCode = (int)osdresponse.StatusCode;
+                using (StreamReader responseStream = new StreamReader(osdresponse.GetResponseStream()))
+                {
+                    post_response = responseStream.ReadToEnd();
+                    responseStream.Close();
+                }
+                _response = post_response;
+                funcStatus = true;
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error("HTTPWORKER", ex.ToString());
+                funcStatus = false;
+            }
+            return funcStatus;
+        }
+        public static bool httpCall_POST(string _urlPrefix, string _urlParam, string _request, string _token, out int statusCode, out string _response)
+        {
+            bool funcStatus = false;
+            _response = string.Empty;
+            statusCode = 0;
+            try
+            {
+                string url = string.Format("{0}/{1}", _urlPrefix, _urlParam);
+                System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                                     | SecurityProtocolType.Tls11
+                                     | SecurityProtocolType.Tls12;
+                HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(string.Format(url));
+                httpRequest.Method = "POST";
+                httpRequest.ContentType = "application/x-www-form-urlencoded";
+                httpRequest.Timeout = 3 * 60 * 1000;
+                httpRequest.Headers["Authorization"] = _token;
+                byte[] postBytes = Encoding.UTF8.GetBytes(_request);
+                httpRequest.ContentLength = postBytes.Length;
+                Stream requestStream = httpRequest.GetRequestStream();
+                requestStream.Write(postBytes, 0, postBytes.Length);
+                requestStream.Close();
+                string post_response = string.Empty;
+                HttpWebResponse osdresponse = (HttpWebResponse)httpRequest.GetResponseWithoutException();
+                statusCode = (int)osdresponse.StatusCode;
+                using (StreamReader responseStream = new StreamReader(osdresponse.GetResponseStream()))
+                {
+                    post_response = responseStream.ReadToEnd();
+                    responseStream.Close();
+                }
+                _response = post_response;
+                funcStatus = true;
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error("HTTPWORKER", ex.ToString());
+                //exceptionManager.ManageException(ex, "httpCall_POST");
+                funcStatus = false;
+            }
+            return funcStatus;
+        }
+        public static bool http_POST(string _urlPrefix, string _request, out int statusCode, out string _response)
+        {
+            bool funcStatus = false;
+            _response = string.Empty;
+            statusCode = 0;
+            try
+            {
+                string url = string.Format("{0}", _urlPrefix);
+                System.Net.ServicePointManager.ServerCertificateValidationCallback = delegate (object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors) { return true; };
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls
+                                     | SecurityProtocolType.Tls11
+                                     | SecurityProtocolType.Tls12;
+                HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(string.Format(url));
+                httpRequest.Method = "POST";
+                httpRequest.ContentType = "application/json; encoding='utf-8'";
+                httpRequest.Timeout = 3 * 60 * 1000;
+                byte[] postBytes = Encoding.UTF8.GetBytes(_request);
+                httpRequest.ContentLength = postBytes.Length;
+                Stream requestStream = httpRequest.GetRequestStream();
+                requestStream.Write(postBytes, 0, postBytes.Length);
+                requestStream.Close();
+                string post_response = string.Empty;
+                HttpWebResponse osdresponse = (HttpWebResponse)httpRequest.GetResponseWithoutException();
+                statusCode = (int)osdresponse.StatusCode;
+                using (StreamReader responseStream = new StreamReader(osdresponse.GetResponseStream()))
+                {
+                    post_response = responseStream.ReadToEnd();
+                    responseStream.Close();
+                }
+                _response = post_response;
+                funcStatus = true;
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error("HTTPWORKER", ex.ToString());
+                funcStatus = false;
+            }
+            return funcStatus;
+        }
+    }
+    public static class WebRequestExtensions
+    {
+        public static WebResponse GetResponseWithoutException(this WebRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+            try
+            {
+                return request.GetResponse();
+            }
+            catch (WebException e)
+            {
+                if (e.Response == null)
+                {
+                    throw;
+                }
+
+                return e.Response;
+            }
+        }
+    }
 }

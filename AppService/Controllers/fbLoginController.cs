@@ -65,8 +65,8 @@ namespace AppService.Controllers
 
                             int expSeconds = Convert.ToInt32(TimeSpan.FromMinutes(expiryMinut).TotalSeconds.ToString());
                             string authExpireDate = DateTime.Now.AddMinutes(expiryMinut).ToString(appConstantValues.DATE_TIME_FORMAT);
-                            string authToken = tokenGenerator.tokenGen20(cardno);
-                            string refreshToken = tokenGenerator.tokenGen20(cardno);
+                            string authToken = tokenGenerator.generateToken(cardno);
+                            string refreshToken = tokenGenerator.generateToken(cardno);
                             if (dbconn.registerToken(cardno, adminnumber, authToken, refreshToken, cip, authExpireDate))
                             {
                                 loginResp.access_token = authToken;

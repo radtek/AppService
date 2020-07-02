@@ -110,9 +110,22 @@ namespace AppServiceUtil.DBControl
         }
         public static string getAppNotification(string cardNo)
         {
-            string qry = string.Format(@"SELECT * FROM (SELECT NOTI_ID, NOTIFICATION_NAME, NOTIFICATION_TEXT, NOTIFICATION_IMG_URL, TO_CHAR(CREATED_DATE,'YYYY-MM-DD') AS NOTIDATE, CARD_NO FROM APP_NOTIFICATION WHERE IS_DELETED='N' AND CARD_NO IS NULL AND EXPIRE_DATE>=SYSDATE
-UNION ALL
-SELECT NOTI_ID, NOTIFICATION_NAME, NOTIFICATION_TEXT, NOTIFICATION_IMG_URL, TO_CHAR(CREATED_DATE,'YYYY-MM-DD') AS NOTIDATE, CARD_NO FROM APP_NOTIFICATION WHERE IS_DELETED='N' AND CARD_NO ='{0}' AND EXPIRE_DATE>=SYSDATE) AA ORDER BY AA.NOTI_ID DESC", cardNo);
+            string qry = string.Format(@"SELECT NOTI_ID, NOTIFICATION_NAME, NOTIFICATION_TEXT, NOTIFICATION_IMG_URL, TO_CHAR(CREATED_DATE,'YYYY-MM-DD') AS NOTIDATE, CARD_NO FROM APP_NOTIFICATION WHERE IS_DELETED='N' AND CARD_NO IN ('0','{0}') ORDER BY NOTI_ID DESC", cardNo);
+            return qry;
+        }
+        public static string getReadNotification(string cardNo)
+        {
+            string qry = string.Format("SELECT NOTI_ID, READ_USER FROM APP_NOTIFICATION_ISREAD WHERE READ_USER = '{0}'", cardNo);
+            return qry;
+        }
+        public static string setReadList(string notifId, string userId)
+        {
+            string qry = string.Format(@"INSERT INTO APP_NOTIFICATION_ISREAD (NOTI_ID, READ_USER) VALUES ('{0}', '{1}')", notifId, userId);
+            return qry;
+        }
+        public static string getUnReadedCount(string userId)
+        {
+            string qry = string.Format(@"SELECT COUNT(0) AS COUNTN FROM APP_NOTIFICATION WHERE CARD_NO IN ('0', '{0}') AND NOTI_ID NOT IN (SELECT NOTI_ID FROM APP_NOTIFICATION_ISREAD WHERE READ_USER ='{0}')", userId);
             return qry;
         }
         public static string saveNotification(string title, string body, string expDate, string cardno)
@@ -186,5 +199,11 @@ SELECT NOTI_ID, NOTIFICATION_NAME, NOTIFICATION_TEXT, NOTIFICATION_IMG_URL, TO_C
             string qry = string.Format("SELECT SUBSCRIBER_FNAME, CARD_NO, IS_PREPAID FROM T_DISH_CUSTOM WHERE SUBSCRIBER_STATUS=1 AND CARD_NO='{0}'", sn);
             return qry;
         }
+        public static string checkZuslanProduct(string sn)
+        {
+            string qry = string.Format("SELECT CARD_NUMBER, END_DATE FROM ACCOUNT_SERVICE WHERE CARD_NUMBER={0} AND PRODUCT_ID=86 AND END_DATE > SYSDATE", sn);
+            return qry;
+        }
+
     }
 }

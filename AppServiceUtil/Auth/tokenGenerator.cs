@@ -35,6 +35,32 @@ namespace AppServiceUtil.Auth
             }
             return retValue;
         }
+        public static string generateToken(string card)
+        {
+            string retValue = string.Empty;
+            try
+            {
+                string _key = card;
+                TripleDESCryptoServiceProvider objDESCrypto = new TripleDESCryptoServiceProvider();
+                MD5CryptoServiceProvider objHashMD5 = new MD5CryptoServiceProvider();
+                byte[] byteHash, byteBuff;
+                string strTempKey = _converter.strtoHex(_converter.rndStr(8));
+                byteHash = objHashMD5.ComputeHash(UTF8Encoding.UTF8.GetBytes(strTempKey));
+                objHashMD5 = null;
+                objDESCrypto.Key = byteHash;
+                objDESCrypto.Mode = CipherMode.ECB; //CBC, CFB
+                byte[] _key0 = Encoding.Unicode.GetBytes(_converter.rndStr(8));
+                byte[] _key1 = Encoding.Unicode.GetBytes(_key);
+                byteBuff = UTF8Encoding.UTF8.GetBytes("AppServiceToken");
+                string base64str = Convert.ToBase64String(objDESCrypto.CreateEncryptor(_key0, _key1).TransformFinalBlock(byteBuff, 0, byteBuff.Length));
+                retValue = _converter.strtoHex(base64str);
+            }
+            catch (Exception ex)
+            {
+                retValue = "error: " + ex.Message;
+            }
+            return retValue;
+        }
     }
     public class _converter
     {
@@ -337,5 +363,25 @@ namespace AppServiceUtil.Auth
             }
             return result.ToString();
         }
+        public static string rndStr(int maxSize)
+        {
+            char[] chars = new char[62];
+            chars =
+            "ABCDEF1234567890".ToCharArray();
+            byte[] data = new byte[1];
+            using (RNGCryptoServiceProvider crypto = new RNGCryptoServiceProvider())
+            {
+                crypto.GetNonZeroBytes(data);
+                data = new byte[maxSize];
+                crypto.GetNonZeroBytes(data);
+            }
+            StringBuilder result = new StringBuilder(maxSize);
+            foreach (byte b in data)
+            {
+                result.Append(chars[b % (chars.Length)]);
+            }
+            return result.ToString();
+        }
+
     }
 }

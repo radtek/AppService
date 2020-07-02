@@ -14,13 +14,13 @@ namespace AppServiceUtil.Utils
             switch(productId)
             {
                 case "28":
-                    prods = "3, 26, 67, 70, 79";
+                    prods = "3, 26, 67, 70, 79, 86";
                     break;
                 case "27":
-                    prods = "26, 67";
+                    prods = "26, 67, 86";
                     break;
                 case "29":
-                    prods = "3, 26, 67";
+                    prods = "3, 26, 67, 86";
                     break;
                 case "73":
                     prods = string.Empty;

@@ -58,6 +58,7 @@
     <Compile Include="AppserviceModel\newOrderModel.cs" />
     <Compile Include="AppserviceModel\newPromotionModel.cs" />
     <Compile Include="AppserviceModel\notificationModel.cs" />
+    <Compile Include="AppserviceModel\othersAccountChargeMdl.cs" />
     <Compile Include="AppserviceModel\productListModel.cs" />
     <Compile Include="AppserviceModel\pushNotiModel.cs" />
     <Compile Include="AppserviceModel\pushVodComingModel.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="TabletModel\LoginResponse.cs" />
     <Compile Include="TabletModel\NotificationResponse.cs" />
     <Compile Include="TabletModel\refreshServiceResponse.cs" />
+    <Compile Include="TabletModel\UserInfoResponse.cs" />
     <Compile Include="Utils\additionalProductSelector.cs" />
     <Compile Include="Utils\appConstantValues.cs" />
     <Compile Include="Utils\convertors.cs" />

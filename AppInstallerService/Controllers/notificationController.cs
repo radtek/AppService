@@ -178,7 +178,61 @@ namespace AppInstallerService.Controllers
             return message;
         }
 
+        /// <summary>
+        /// Уншигдаагүй Сонордуулгын жагсаалт авах сервис
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("unread")]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<UnReadedResponse>))]
+        public async Task<HttpResponseMessage> GetUnreadCount()
+        {
+            LogWriter._noti(TAG, string.Format(@"[>>] Request: [****]"));
+            HttpResponseMessage message = new HttpResponseMessage();
+            UnReadedResponse response = new UnReadedResponse();
+            string ip = httpUtil.GetClientIPAddress(HttpContext.Current.Request);
+            string secToken = string.Empty;
+            try
+            {
+                secToken = HttpContext.Current.Request.Headers["Authorization"].Replace("Basic ", "").Trim();
+                if (dbconn.idbStatOK())
+                {
+                    string insId = string.Empty;
+                    string insPhone = string.Empty;
+                    if (dbconn.tabletCheckToken(secToken, out insId, out insPhone))
+                    {
+                        DataTable dt = dbconn.getTable(tabletQuery.getUnReadedCount(insId));
+                        response.isSuccess = true;
+                        response.errorCode = Convert.ToString((int)HttpStatusCode.OK);
+                        response.resultMessage = "success";
+                        response.unReadCount = int.Parse(dt.Rows[0]["COUNTN"].ToString());
 
+                    }
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.errorCode = Convert.ToString((int)HttpStatusCode.Unauthorized);
+                        response.resultMessage = "Session has expired";
+                    }
+                }
+                else
+                {
+                    response.isSuccess = false;
+                    response.errorCode = Convert.ToString((int)HttpStatusCode.InternalServerError);
+                    response.resultMessage = "Internal Error";
+                }
+            }
+            catch(Exception ex)
+            {
+                LogWriter._error(TAG, string.Format(@"Token: [{0}], Exception: [{1}]", secToken, ex.ToString()));
+                response.isSuccess = false;
+                response.errorCode = Convert.ToString((int)HttpStatusCode.InternalServerError);
+                response.resultMessage = ex.Message;
+            }
+            LogWriter._noti(TAG, string.Format(@"[<<] ClientIp: [{0}], Response: [{1}]", ip, serializer.Serialize(response)));
+            message = Request.CreateResponse(HttpStatusCode.OK, response);
+            return message;
+        }
 
 
         private bool isRead(List<ReadStat> isReads, string notiId)

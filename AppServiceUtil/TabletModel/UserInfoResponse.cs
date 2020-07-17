@@ -24,6 +24,7 @@ namespace AppServiceUtil.TabletModel
         public virtual string adminNo { get; set; }
         public virtual string password { get; set; }
         public virtual string customerType { get; set; }
+        public virtual string ccType { get; set; }
         public virtual List<Product> activeProducts { get; set; }
         public virtual List<AccountInfo> activeAccounts { get; set; }
         public virtual List<UpointInfo> upoint { get; set; }

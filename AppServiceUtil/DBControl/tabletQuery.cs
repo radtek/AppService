@@ -80,5 +80,10 @@ SELECT COUNTER_AMOUNT, COUNTER_ID, COUNTER_EXPIRE_DATE FROM D_ACCOUNT_COUNTERS W
             string qry = string.Format("SELECT MSISDN FROM D_MEMBER WHERE CARD_NO='{0}'", cardNo);
             return qry;
         }
+        public static string getActiveMainProducts(string cardNo, string mainProds)
+        {
+            string qry = string.Format("SELECT AA.CARD_NUMBER, AA.END_DATE, AA.PRODUCT_ID, BB.PRODUCT_NAME_MON, BB.ORDERING FROM ACCOUNT_SERVICE AA LEFT JOIN PRODUCT_CATALOG BB ON AA.PRODUCT_ID = BB.PRODUCT_ID WHERE AA.CARD_NUMBER={0} AND AA.END_DATE > SYSDATE AND AA.PRODUCT_ID IN ({1}) ORDER BY BB.ORDERING DESC", cardNo, mainProds);
+            return qry;
+        }
     }
 }

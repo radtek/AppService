@@ -218,7 +218,7 @@ namespace AppService.Controllers
         /// <param name="cardNo">Шалгасан хэрэглэгчийн картын дугаар (mandatory)</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("{amount}/{bankName}/cardNo")]
+        [Route("{amount}/{bankName}/{cardNo}")]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModelWidthVat>))]
         public async Task<HttpResponseMessage> Get(string amount, string bankName, string cardNo)
         {

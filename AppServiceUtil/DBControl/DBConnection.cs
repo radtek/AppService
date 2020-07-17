@@ -514,7 +514,7 @@ namespace AppServiceUtil.DBControl
             }
             return retValue;
         }
-        public bool chargeProduct(string _prodId, string _month, string _userName, string _amount, string _desc, string _cardNo)
+        public bool chargeProduct(string _prodId, string _month, string _userName, string _amount, string _desc, string _cardNo, string channel)
         {
             bool retVal = false;
             try
@@ -527,7 +527,7 @@ namespace AppServiceUtil.DBControl
                 ocm.Parameters.Add("puser", OracleDbType.Varchar2, 100).Value = _userName;
                 ocm.Parameters.Add("pbranch", OracleDbType.Varchar2, 30).Value = "286";
                 ocm.Parameters.Add("pamount", OracleDbType.Decimal, 30).Value = Convert.ToDecimal(_amount);
-                ocm.Parameters.Add("pchannelType", OracleDbType.Varchar2, 30).Value = "6";
+                ocm.Parameters.Add("pchannelType", OracleDbType.Varchar2, 30).Value = channel;
                 ocm.Parameters.Add("pcallType", OracleDbType.Int32, 30).Value = 9;
                 ocm.Parameters.Add("pdescription", OracleDbType.Varchar2, 500).Value = _desc;
                 ocm.Parameters.Add("pcardNumber", OracleDbType.Varchar2, 30).Value = _cardNo;

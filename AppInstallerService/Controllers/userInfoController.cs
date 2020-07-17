@@ -70,6 +70,7 @@ namespace AppInstallerService.Controllers
                             response.adminNo = dtUInfo.Rows[0]["PHONE_NO"].ToString();
                             response.password = dtUInfo.Rows[0]["SUBSCRIBER_PASS"].ToString();
                             response.customerType = dtUInfo.Rows[0]["TYPE_NAME"].ToString();
+                            response.ccType = dtUInfo.Rows[0]["IS_PREPAID"].ToString();
                             List<Product> prds = new List<Product>();
                             List<AccountInfo> accs = new List<AccountInfo>();
                             List<Member> mmbrs = new List<Member>();

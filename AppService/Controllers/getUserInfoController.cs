@@ -165,7 +165,7 @@ namespace AppService.Controllers
         /// <summary>
         /// Үндсэн дансны мэдээлэл харах
         /// </summary>
-        /// <param name="counter">Ямар утга өгч болно</param>
+        /// <param name="counter">Ямар ч утга өгч болно</param>
         /// <remarks>Зөвхөн Үндсэн дансны мэдээлэл буцаана.</remarks>
         /// <returns></returns>
         [HttpGet]
@@ -229,6 +229,89 @@ namespace AppService.Controllers
             message = Request.CreateResponse(HttpStatusCode.OK, response);
             LogWriter._userInfo(TAG, string.Format("IP: [{0}], Request: [{1}], Response: [{2}], Token: [{3}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), counter, serialzer.Serialize(response), token));
             return message;
+        }
+
+        /// <summary>
+        /// Мерчантаар төлбөр төлөхөд хэрэглэгчийн төрлийг шалгах сервис True буцаавал цааш үргэлжлүүлнэ. False бол дараа төлбөрт хэрэглэгч юм.
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("checkType")]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModel>))]
+        public HttpResponseMessage GetCType()
+        {
+            HttpResponseMessage message = new HttpResponseMessage();
+            defaultResponseModel response = new defaultResponseModel();
+            string token = HttpContext.Current.Request.Headers["Authorization"].Replace("Bearer ", "").Trim();
+            LogWriter._userInfo(TAG, string.Format("[>>] Token: [{0}]", token));
+            try
+            {
+                if (dbconn.idbCheck(out dbres))
+                {
+                    string userCardNo = string.Empty;
+                    string userAdminNo = string.Empty;
+                    if (dbconn.checkToken(token, out userCardNo, out userAdminNo))
+                    {
+                        if (checkCustomType(userCardNo))
+                        {
+                            response.isSuccess = true;
+                            response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                            response.resultMessage = appConstantValues.MSG_SUCCESS;
+                        }
+                        else
+                        {
+                            response.isSuccess = false;
+                            response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                            response.resultMessage = "Дараа төлбөрт хэрэглэгч тул ашиглах боломжгүй.";
+                        }
+                    }
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                        response.resultMessage = appConstantValues.MSG_EXPIRED;
+                    }
+                }
+                else
+                {
+                    response.isSuccess = false;
+                    response.resultCode = HttpStatusCode.NotFound.ToString();
+                    response.resultMessage = dbres;
+                }
+
+            }
+            catch(Exception ex)
+            {
+                response.isSuccess = false;
+                response.resultCode = HttpStatusCode.NotFound.ToString();
+                response.resultMessage = ex.Message;
+                exceptionManager.ManageException(ex, TAG);
+            }
+            message = Request.CreateResponse(HttpStatusCode.OK, response);
+            LogWriter._userInfo(TAG, string.Format(@"[<<] Response: [{0}]", serialzer.Serialize(response)));
+            return message;
+        }
+
+        private bool checkCustomType(string cardNo)
+        {
+            bool res = false;
+            try
+            {
+                DataTable dt = dbconn.getTable(appServiceQry.checkCard(cardNo));
+                if (dt.Rows.Count != 0)
+                {
+                    string type = dt.Rows[0]["IS_PREPAID"].ToString();
+                    if (type == "1")
+                    {
+                        res = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                exceptionManager.ManageException(ex, TAG);
+            }
+            return res;
         }
     }
 }

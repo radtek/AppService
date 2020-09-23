@@ -14,6 +14,7 @@ using System.Web;
 using System.Web.Script.Serialization;
 using Swashbuckle.Swagger.Annotations;
 using System.Threading.Tasks;
+using System.Net.Http.Headers;
 
 namespace AppService.Controllers
 {
@@ -140,7 +141,7 @@ namespace AppService.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("{productId}/{month}/{amount}/{bankName}")]
-        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModelWidthVat>))]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModel>))]
         public async Task<HttpResponseMessage> Get(string productId, string month, string amount, string bankName)
         {
             HttpResponseMessage message = null;

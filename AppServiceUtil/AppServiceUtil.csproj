@@ -65,6 +65,8 @@
     <Compile Include="AppserviceModel\refreshListMdl.cs" />
     <Compile Include="AppserviceModel\searchArVodMdl.cs" />
     <Compile Include="AppserviceModel\upgradeProductListModel.cs" />
+    <Compile Include="AppserviceModel\upointModel.cs" />
+    <Compile Include="AppserviceModel\vatHistoryModel.cs" />
     <Compile Include="AppserviceModel\vodListModel.cs" />
     <Compile Include="Auth\tokenGenerator.cs" />
     <Compile Include="chatbotModel\getCardNoMdl.cs" />

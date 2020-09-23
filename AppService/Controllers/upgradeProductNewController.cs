@@ -128,7 +128,7 @@ namespace AppService.Controllers
         /// [Багц ахиулалтын шинэ нөхцөл] Сонгосон багц руу ахиулах сервис.
         /// </summary>
         /// <param name="toProductId">Ахиулах багцын ID (mandatory)</param>
-        /// <param name="accept">default value is yes</param>
+        /// <param name="accept">1 - use Virtual Account, 2 - use Upoint, 0 - use Merchant</param>
         /// <returns></returns>
         [HttpGet]
         [Route("{toProductId}/{accept}")]
@@ -141,6 +141,30 @@ namespace AppService.Controllers
             string token = HttpContext.Current.Request.Headers["Authorization"].Replace("Bearer ", "").Trim();
             try
             {
+                string payType = string.Empty;
+                switch (accept)
+                {
+                    case "yes":
+                        payType = "1";
+                        // Виртуал данснаас зарцуулалт хийх
+                        break;
+                    case "2":
+                        payType = "2";
+                        // Upoint оноогоор зарцуулалт хийх
+                        break;
+                    case "1":
+                        payType = "1";
+                        // Виртуал данснаас зарцуулалт хийх
+                        break;
+                    case "0":
+                        // Бэлэн төлөлтөөр зарцуулалт хийх
+                        payType = "0";
+                        break;
+                    default:
+                        payType = "1";
+                        break;
+                }
+
                 if (dbconn.idbCheck(out dbres))
                 {
                     string userCardNo = string.Empty;
@@ -154,7 +178,7 @@ namespace AppService.Controllers
                             convProd.Channel = "6";
                             convProd.cardNo = userCardNo;
                             convProd.ConvertProduct = toProductId;
-                            convProd.Pay_type = "1";
+                            convProd.Pay_type = payType;
                             convProd.Username = userAdminNo;
                             string convJson = serializer.Serialize(convProd);
                             string localResponse = string.Empty;
@@ -166,13 +190,13 @@ namespace AppService.Controllers
                                 {
                                     response.isSuccess = true;
                                     response.resultCode = HttpStatusCode.OK.ToString();
-                                    response.resultMessage = appConstantValues.MSG_SUCCESS;
+                                    response.resultMessage = convObj.errorMsg;
                                 }
                                 else
                                 {
                                     response.isSuccess = false;
                                     response.resultCode = HttpStatusCode.NotFound.ToString();
-                                    response.resultMessage = "Багц ахиулалт амжилтгүй боллоо.";
+                                    response.resultMessage = convObj.errorMsg;
                                 }
                             }
                             else

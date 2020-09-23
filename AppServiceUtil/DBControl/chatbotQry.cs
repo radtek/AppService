@@ -33,5 +33,11 @@ namespace AppServiceUtil.DBControl
             string qry = string.Format(@"INSERT INTO APP_NEW_PROMOTION_DETIAL(PROMOTION_ID, DETIAL_POSTER_URL) VALUES ({0}, '{1}')", _promoId, _promoDetialImg);
             return qry;
         }
+
+        public static string _saveFbId(string fbid, string adminNo)
+        {
+            string qry = string.Format(@"UPDATE T_DISH_CUSTOM SET FB_ID = '{0}' WHERE CARD_NO IN (SELECT CARD_NO FROM ADMIN_NUMBER WHERE PHONE_NO = '{1}')", fbid, adminNo);
+            return qry;
+        }
     }
 }

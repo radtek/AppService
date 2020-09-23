@@ -130,6 +130,7 @@
     <Compile Include="Controllers\productListController.cs" />
     <Compile Include="Controllers\pushNotificationController.cs" />
     <Compile Include="Controllers\pushVodController.cs" />
+    <Compile Include="Controllers\qPayController.cs" />
     <Compile Include="Controllers\refreshListController.cs" />
     <Compile Include="Controllers\refreshSmartCardController.cs" />
     <Compile Include="Controllers\regClientTokenController.cs" />
@@ -138,6 +139,8 @@
     <Compile Include="Controllers\tokenController.cs" />
     <Compile Include="Controllers\upgradeProductController.cs" />
     <Compile Include="Controllers\upgradeProductNewController.cs" />
+    <Compile Include="Controllers\uPointController.cs" />
+    <Compile Include="Controllers\vatHistoryController.cs" />
     <Compile Include="Controllers\vodListController.cs" />
     <Compile Include="Controllers\vodListWebController.cs" />
     <Compile Include="Global.asax.cs">

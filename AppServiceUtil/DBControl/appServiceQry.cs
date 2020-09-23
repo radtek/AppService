@@ -18,6 +18,11 @@ namespace AppServiceUtil.DBControl
             string qry = string.Format(@"SELECT AA.SUBSCRIBER_CODE, AA.SUBSCRIBER_FNAME, AA.SUBSCRIBER_LNAME, AA.STB_NO, BB.PHONE_NO, AA.CERTIFICATE_NO, AA.SUBSCRIBER_PASS, BB.CARD_NO FROM T_DISH_CUSTOM AA LEFT JOIN ADMIN_NUMBER BB ON AA.CARD_NO = BB.CARD_NO WHERE BB.PHONE_NO = '{0}' AND AA.SUBSCRIBER_STATUS=1", PhoneNo);
             return qry;
         }
+        public static string _getUserInfoByMemberNo(string PhoneNo)
+        {
+            string qry = string.Format(@"SELECT AA.SUBSCRIBER_CODE, AA.SUBSCRIBER_FNAME, AA.SUBSCRIBER_LNAME, AA.STB_NO, BB.MSISDN AS PHONE_NO, AA.CERTIFICATE_NO, AA.SUBSCRIBER_PASS, BB.CARD_NO FROM T_DISH_CUSTOM AA LEFT JOIN D_MEMBER BB ON AA.CARD_NO = BB.CARD_NO WHERE BB.MSISDN = '{0}' AND AA.SUBSCRIBER_STATUS=1", PhoneNo);
+            return qry;
+        }
         public static string _getPromoCounters(string cardNo)
         {
             string qry = string.Format(@"SELECT BB.NAME, AA.COUNTER_AMOUNT, TO_CHAR(AA.COUNTER_EXPIRE_DATE, 'YYYY-MM-DD HH24:MI:SS') AS EXPIREDATE, AA.COUNTER_ID, BB.MEASUREUNIT FROM D_ACCOUNT_COUNTERS AA, D_COUNTERS BB WHERE AA.CARD_NO ='{0}' AND AA.COUNTER_EXPIRE_DATE >= SYSDATE AND AA.COUNTER_ID = BB.COUNTER_ID ORDER BY AA.COUNTER_ID ASC", cardNo);
@@ -133,6 +138,13 @@ namespace AppServiceUtil.DBControl
             string qry = string.Format(@"INSERT INTO APP_NOTIFICATION (NOTIFICATION_NAME, NOTIFICATION_TEXT, EXPIRE_DATE, CARD_NO) VALUES ('{0}', '{1}', TO_DATE('{2}', 'YYYY-MM-DD HH24:MI:SS'), '{3}')", title, body, expDate, cardno);
             return qry;
         }
+        public static string vatHistoryList(string cardNo)
+        {
+            string qry = string.Format(@"select AA.CARD_NO, AA.AMOUNT, AA.BILLID, AA.LOTTERYNO, AA.RESULTDATE, BB.QRDATA, AA.USERCODE from (select CARD_NO, sum(AMOUNT) as amount, BILLID, LOTTERYNO, RESULTDATE, USERCODE, CREATEDATE from MTA_TRANSACTION_LIST where CARD_NO='{0}' and ISORGANIZATION ='N' and ISRETURN='N' and to_char(CREATEDATE, 'yyyy')='{1}' group by CARD_NO, BILLID, LOTTERYNO, RESULTDATE, USERCODE, CREATEDATE) aa, 
+MTA_TRANSACTION_ADDITIONAL bb where AA.BILLID = BB.BILL_ID ORDER BY AA.CREATEDATE DESC", cardNo, DateTime.Today.ToString("yyyy"));
+            return qry;
+        }
+
         public static string _getVODComing()
         {
             //string qry = string.Format(@"SELECT CONTENT_NAME, CONTENT_IMG_URL FROM APP_VOD_COMING WHERE IS_DELETED='N' AND EXPIRE_DATE>=SYSDATE");
@@ -204,6 +216,15 @@ namespace AppServiceUtil.DBControl
             string qry = string.Format("SELECT CARD_NUMBER, END_DATE FROM ACCOUNT_SERVICE WHERE CARD_NUMBER={0} AND PRODUCT_ID=86 AND END_DATE > SYSDATE", sn);
             return qry;
         }
-
+        public static string setQpayInvoice(string invoiceNo)
+        {
+            string qry = string.Format("INSERT INTO QPAY_INVOICE_STATUS (INVOICE_NO) VALUES ('{0}')", invoiceNo);
+            return qry;
+        }
+        public static string getQpayInvoice(string invoiceNo)
+        {
+            string qry = string.Format("SELECT INVOICE_NO, STATUS FROM QPAY_INVOICE_STATUS WHERE INVOICE_NO = '{0}'", invoiceNo);
+            return qry;
+        }
     }
 }

@@ -164,17 +164,33 @@ namespace AppService.Controllers
                         DataTable dt = dtS(searchValue);
                         if(dt.Rows.Count != 0)
                         {
+                            string isprepaid = dt.Rows[0]["IS_PREPAID"].ToString();
                             string fName = dt.Rows[0]["SUBSCRIBER_FNAME"].ToString();
                             string lName = dt.Rows[0]["SUBSCRIBER_LNAME"].ToString();
                             string card = dt.Rows[0]["CARD_NO"].ToString();
                             string admin = dt.Rows[0]["PHONE_NO"].ToString();
-                            response.isSuccess = true;
-                            response.resultCode = HttpStatusCode.OK.ToString();
-                            response.firstName = fName;
-                            response.lastName = convertors.replaceName(lName);
-                            response.cardNo = card;
-                            response.adminNo = admin;
-                            response.resultMessage = "success";
+                            if (isprepaid != "2")
+                            {
+                                
+                                response.isSuccess = true;
+                                response.resultCode = HttpStatusCode.OK.ToString();
+                                response.firstName = fName;
+                                response.lastName = convertors.replaceName(lName);
+                                response.cardNo = card;
+                                response.adminNo = admin;
+                                response.resultMessage = "success";
+                            }
+                            else
+                            {
+                                response.isSuccess = false;
+                                response.resultCode = HttpStatusCode.OK.ToString();
+                                response.firstName = fName;
+                                response.lastName = convertors.replaceName(lName);
+                                response.cardNo = card;
+                                response.adminNo = admin;
+                                response.resultMessage = "Дараа төлбөрт хэрэглэгч тул ашиглах боломжгүй.";
+
+                            }
                         }
                         else
                         {

@@ -54,6 +54,11 @@ namespace AppService.Controllers
                             {
                                 case 8:
                                     dt = dbconn.getTable(appServiceQry._getUserInfoByAdminNo(injson.username));
+                                    if(dt.Rows.Count == 0)
+                                    {
+                                        dt.Clear();
+                                        dt = dbconn.getTable(appServiceQry._getUserInfoByMemberNo(injson.username));
+                                    }
                                     break;
                                 case 10:
                                     dt = dbconn.getTable(appServiceQry._getUserInfoByCardNo(injson.username));

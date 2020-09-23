@@ -65,6 +65,21 @@ namespace AppServiceUtil.Utils
             }
             return retValue;
         }
+        public static string generateInvoiceNo(string prefix)
+        {
+            string retValue = string.Empty;
+            try
+            {
+                string invoiceNo = prefix + rndStr(3) + ToUnixToHexDate(date: DateTime.Now);
+                retValue = invoiceNo;
+
+            }
+            catch (Exception ex)
+            {
+                retValue = "error: " + ex.Message;
+            }
+            return retValue;
+        }
         public static string strtoHex(string strTXT)
         {
             StringBuilder sb = new StringBuilder();
@@ -95,7 +110,15 @@ namespace AppServiceUtil.Utils
             propEncodeString = Encoding.UTF8.GetString(utf8_Bytes, 0, utf8_Bytes.Length);
             return propEncodeString;
         }
+        public static string ToUnixToHexDate(DateTime date)
 
+        {
+            string hexDate = null;
+            DateTime unixStartTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            TimeSpan timeSpan = date.AddHours(-8) - unixStartTime;
+            return hexDate = string.Format("{0:X}", Convert.ToInt64(timeSpan.TotalSeconds));
+
+        }
         public static string rndStr(int maxSize)
         {
             char[] chars = new char[62];

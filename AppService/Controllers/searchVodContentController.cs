@@ -28,12 +28,11 @@ namespace AppService.Controllers
         /// Идэвхтэй хөтөлбөрийн жагсаалтаас контент хайх service
         /// </summary>
         /// <param name="searchValue">Хайх контентын англи болон монгол нэр (mandatory)</param>
-        /// <param name="res">default value is 0</param>
         /// <returns></returns>
         [HttpGet]
-        [Route("{searchValue}/{res}")]
+        [Route("{searchValue}")]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<vodProgramModel>))]
-        public HttpResponseMessage Get([FromUri]PagingParameterModel vodPagingModel, string searchValue, string res)
+        public HttpResponseMessage Get([FromUri]PagingParameterModel vodPagingModel, string searchValue)
         {
             HttpResponseMessage message = null;
             vodProgramModel program = new vodProgramModel();

@@ -20,7 +20,7 @@ namespace AppService.Controllers
     [RoutePrefix("api/chatbotGetCardNo")]
     public class chatbotGetCardNoController : ApiController
     {
-        private string TAG = "vodList";
+        private string TAG = "ChatBot";
         DBConnection dbconn = new DBConnection();
         JavaScriptSerializer serialzer = new JavaScriptSerializer();
         private string dbres = string.Empty;
@@ -113,7 +113,7 @@ namespace AppService.Controllers
         public HttpResponseMessage GetAcitveProduct(string adminNo, string activeProducts)
         {
             LogWriter._chatBot(TAG, string.Format(@"[>>] Request: [{0}]", adminNo));
-            HttpResponseMessage message = null;
+            HttpResponseMessage message = new HttpResponseMessage() ;
             activeProductsMdl response = new activeProductsMdl();
             string token = HttpContext.Current.Request.Headers["Authorization"].Replace("Bearer ", "").Trim();
             try
@@ -149,6 +149,68 @@ namespace AppService.Controllers
                             response.isSuccess = false;
                             response.resultCode = HttpStatusCode.NotFound.ToString();
                             response.resultMessage = appConstantValues.MSG_NOFOUND;
+                        }
+                    }
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.resultCode = HttpStatusCode.NotFound.ToString();
+                        response.resultMessage = appConstantValues.MSG_INTERNAL_ERROR;
+                    }
+                }
+                else
+                {
+                    response.isSuccess = false;
+                    response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                    response.resultMessage = appConstantValues.MSG_EXPIRED;
+                }
+            }
+            catch(Exception ex)
+            {
+                exceptionManager.ManageException(ex, TAG);
+                response.isSuccess = false;
+                response.resultCode = HttpStatusCode.NotFound.ToString();
+                response.resultMessage = ex.Message;
+            }
+            message = Request.CreateResponse(HttpStatusCode.OK, response);
+            LogWriter._chatBot(TAG, string.Format("[<<] IP: [{0}], Response: [{1}], Token: [{2}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), serialzer.Serialize(response), token));
+            return message;
+        }
+
+
+        /// <summary>
+        /// [only ChatBot] Хэрэглэгчийн facebook id хадгалах сервис
+        /// </summary>
+        /// <param name="adminNo"></param>
+        /// <param name="facebookId"></param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("saveFB/{adminNo}/{facebookId}")]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModel>))]
+        public HttpResponseMessage GetSaveFBId(string adminNo, string facebookId)
+        {
+            LogWriter._chatBot(TAG, string.Format(@"[>>] Request: [{0}], FacebookId: [{1}]", adminNo, facebookId));
+            HttpResponseMessage message = new HttpResponseMessage();
+            defaultResponseModel response = new defaultResponseModel();
+            string token = HttpContext.Current.Request.Headers["Authorization"].Replace("Bearer ", "").Trim();
+            try
+            {
+                if (token == "YGHM9SHBC81LMR4G")
+                {
+                    if (dbconn.idbCheck(out dbres))
+                    {
+                        string res = dbconn.iDBCommand(chatbotQry._saveFbId(facebookId, adminNo));
+                        if (res.Contains("FFFFx["))
+                        {
+                            response.isSuccess = false;
+                            response.resultCode = HttpStatusCode.NotFound.ToString();
+                            response.resultMessage = "Could not save facebook id.";
+                        }
+                        else
+                        {
+                            response.isSuccess = true;
+                            response.resultCode = HttpStatusCode.OK.ToString();
+                            response.resultMessage = appConstantValues.MSG_SUCCESS;
                         }
                     }
                     else

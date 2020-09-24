@@ -116,6 +116,7 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\accountChargeController.cs" />
     <Compile Include="Controllers\accountChargeManualController.cs" />
+    <Compile Include="Controllers\appMerchantController.cs" />
     <Compile Include="Controllers\chargeProductController.cs" />
     <Compile Include="Controllers\chatbotChargeProductController.cs" />
     <Compile Include="Controllers\chatbotGetCardNoController.cs" />

@@ -226,5 +226,20 @@ MTA_TRANSACTION_ADDITIONAL bb where AA.BILLID = BB.BILL_ID ORDER BY AA.CREATEDAT
             string qry = string.Format("SELECT INVOICE_NO, STATUS FROM QPAY_INVOICE_STATUS WHERE INVOICE_NO = '{0}'", invoiceNo);
             return qry;
         }
+        public static string setCProductRequest(string card, string phone, string token, string invId, string prodId, string month, string amount, string bankName)
+        {
+            string qry = string.Format("INSERT INTO APP_MERCHANT_PENDING_TRANSACTIONS (REQUEST_TYPE, CARD_NO, PHONE_NO, TOKEN, INVOICE_NO, PRODUCT_ID, MONTH, AMOUNT, BANKNAME) VALUES ('1001', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')", card, phone, token, invId, prodId, month, amount, bankName);
+            return qry;
+        }
+        public static string setONvodRequest(string card, string phone, string token, string invId, string prodId, string amount, string bankName, string smscode, string indate)
+        {
+            string qry = string.Format("INSERT INTO APP_MERCHANT_PENDING_TRANSACTIONS (REQUEST_TYPE, CARD_NO, PHONE_NO, TOKEN, INVOICE_NO, PRODUCT_ID, AMOUNT, BANKNAME, SMSCODE, INDATE) VALUES ('1004', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', '{8}')", card, phone, token, invId, prodId, amount, bankName, smscode, indate);
+            return qry;
+        }
+        public static string setCAccount(string ssType, string card, string phone, string token, string invId, string amount, string bankName)
+        {
+            string qry = string.Format("INSERT INTO APP_MERCHANT_PENDING_TRANSACTIONS (REQUEST_TYPE, CARD_NO, PHONE_NO, TOKEN, INVOICE_NO, AMOUNT, BANKNAME) VALUES ('{6}', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}')", card, phone, token, invId, amount, bankName, ssType);
+            return qry;
+        }
     }
 }

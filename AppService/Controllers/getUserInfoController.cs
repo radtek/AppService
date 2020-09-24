@@ -261,7 +261,7 @@ namespace AppService.Controllers
                         else
                         {
                             response.isSuccess = false;
-                            response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                            response.resultCode = HttpStatusCode.NotAcceptable.ToString();
                             response.resultMessage = "Дараа төлбөрт хэрэглэгч тул ашиглах боломжгүй.";
                         }
                     }

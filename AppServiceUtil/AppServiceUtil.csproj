@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="AppserviceModel\accountChargeManualModel.cs" />
     <Compile Include="AppserviceModel\antennaInstallationManualMdl.cs" />
+    <Compile Include="AppserviceModel\appMerchantRequestModel.cs" />
     <Compile Include="AppserviceModel\chargeProductModel.cs" />
     <Compile Include="AppserviceModel\getSalesCenterModel.cs" />
     <Compile Include="AppserviceModel\getUserInfo.cs" />

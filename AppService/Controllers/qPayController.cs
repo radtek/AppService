@@ -24,9 +24,9 @@ namespace AppService.Controllers
         JavaScriptSerializer serializer = new JavaScriptSerializer();
 
         /// <summary>
-        /// [Webhook] Гүйлгээ амжилттай болсон эсэхийг хүлээн авах сервис. Qpay талаас дуудна.
+        /// [Webhook] Гүйлгээ амжилттай болсон эсэхийг хүлээн авах сервис.
         /// </summary>
-        /// <param name="invoiceId">Клиент талаас үүсгэсэн invoice_no байна.</param>
+        /// <param name="invoiceId">Тухайн гүйлгээнд харгалзах Invoice no байна.</param>
         /// <returns></returns>
         [HttpGet]
         //[Route("{amount}/{bankName}")]
@@ -40,29 +40,16 @@ namespace AppService.Controllers
             {
                 if (dbconn.idbCheck(out dbres))
                 {
-                    if(invoiceId.Length != 0)
+                    string commandResult = string.Empty;
+                    bool cmp = completeTrans(invoiceId, out commandResult);
+                    if (cmp)
                     {
-                        string result = dbconn.iDBCommand(appServiceQry.setQpayInvoice(invoiceId));
-                        if (result.Contains("FFFFx["))
-                        {
-                            LogWriter._error(TAG, result);
-                            response.isSuccess = false;
-                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
-                            response.resultMessage = "falied";
-                        }
-                        else
-                        {
-                            response.isSuccess = true;
-                            response.resultCode = HttpStatusCode.OK.ToString();
-                            response.resultMessage = "success";
-                        }
+                        string cmdRes = dbconn.iDBCommand(appServiceQry.updateInvTrans(invoiceId));
+                        LogWriter._qPay(TAG, string.Format("Update Command Ressult: [{0}]", cmdRes));
                     }
-                    else
-                    {
-                        response.isSuccess = false;
-                        response.resultCode = HttpStatusCode.NotFound.ToString();
-                        response.resultMessage = "bad invoice_no";
-                    }
+                    response.isSuccess = cmp;
+                    response.resultCode = HttpStatusCode.OK.ToString();
+                    response.resultMessage = commandResult;
                 }
                 else
                 {
@@ -222,6 +209,263 @@ namespace AppService.Controllers
             message = Request.CreateResponse(HttpStatusCode.OK, response);
             LogWriter._qPay(TAG, string.Format("[<<] IP: [{0}], Response: [{1}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), serializer.Serialize(response)));
             return message;
+        }
+
+        private bool completeTrans(string invNo, out string resultMessage)
+        {
+            bool result = false;
+            resultMessage = string.Empty;
+            try
+            {
+                DataTable dt = dbconn.getTable(appServiceQry.checkInvTrans(invNo));
+                if (dt.Rows.Count != 0)
+                {
+                    string trId = dt.Rows[0]["ID"].ToString();
+                    string type = dt.Rows[0]["REQUEST_TYPE"].ToString();
+                    string cardno = dt.Rows[0]["CARD_NO"].ToString();
+                    string phone = dt.Rows[0]["PHONE_NO"].ToString();
+                    string invoice = dt.Rows[0]["INVOICE_NO"].ToString();
+                    string productid = dt.Rows[0]["PRODUCT_ID"].ToString();
+                    string month = dt.Rows[0]["MONTH"].ToString();
+                    string amount = dt.Rows[0]["AMOUNT"].ToString();
+                    string bank = dt.Rows[0]["BANKNAME"].ToString();
+                    string smscode = dt.Rows[0]["SMSCODE"].ToString();
+                    string indate = dt.Rows[0]["INDATE"].ToString();
+                    switch (type)
+                    {
+                        case "1001":
+                            // charge Product
+                            result = chargeProduct(cardno, phone, productid, month, amount, bank, out resultMessage);
+                            break;
+                        case "1004":
+                            // order Nvod
+                            result = orderNvod(cardno, phone, productid, amount, bank, smscode, indate, out resultMessage);
+                            break;
+                        case "1007":
+                            // charge Account
+                            result = chargeAccount(cardno, phone, amount, bank, out resultMessage);
+                            break;
+                        case "1010":
+                            // others charge Account
+                            result = chargeAccount(cardno, phone, amount, bank, out resultMessage);
+                            break;
+                        default:
+                            result = false;
+                            resultMessage = "Гүйлгээний төрөл таарсангүй.";
+                            break;
+                    }
+                }
+                else
+                {
+                    result = false;
+                    resultMessage = "Гүйлгээ олдсонгүй.";
+                }
+            }
+            catch(Exception ex)
+            {
+                result = false;
+                LogWriter._error(TAG, ex.Message);
+            }
+            return result;
+        }
+
+        private bool chargeProduct(string card, string phone, string productId, string month, string amount, string bankName, out string message)
+        {
+            bool cp = false;
+            message = string.Empty;
+            _eBarimtRequest ebarimt = new _eBarimtRequest();
+            try
+            {
+                ebarimt.cardNo = card;
+                ebarimt.channelNo = "6";
+                ebarimt.customerEmail = string.Empty;
+                ebarimt.sendEmail = false;
+                ebarimt.employeeCode = phone;
+                ebarimt.organization = false;
+                ebarimt.customerNo = string.Empty;
+                var detials = new List<_transactionDetial>();
+                var stock = new _transactionDetial();
+                stock.barCode = "8463100";
+                stock.price = amount;
+                stock.productId = productId;
+                stock.productName = "Үйлчилгээ идэвхжүүлэх";
+                stock.unit = "сар";
+                stock.qty = month;
+                detials.Add(stock);
+                ebarimt.transaction = detials;
+                string desc = string.Format(@"[Charge Product] Mobile App emerchant {0}", bankName);
+                if (dbconn.chargeProduct(productId, month, phone, amount, desc, card, "6"))
+                {
+                    cp = true;
+                    int sttCode = 0;
+                    string resp = string.Empty;
+                    if (httpWorker.http_POST("http://192.168.10.182:5050/vat/getEBarimt", serializer.Serialize(ebarimt), out sttCode, out resp))
+                    {
+                       
+                        _eBarimtResponse mta = serializer.Deserialize<_eBarimtResponse>(resp);
+                        if (mta.isSuccess)
+                        {
+                            //response.mtaResult = new MTAResult { merchantId = mta.merchantId, amount = mta.amount, billId = mta.billId, date = mta.resultDate, loterryNo = mta.lotteryNo, qrData = mta.qrData, tax = mta.cityTax, vat = mta.vat };
+                            //response.resultMessage = "success";
+                            message = "Амжилттай";
+                        }
+                        else
+                        {
+                            message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                        }
+
+                    }
+                    else
+                    {
+                        message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                    }
+                }
+                else
+                {
+                    cp = false;
+                    message = "Багц сунгахад алдаа гарлаа";
+                }
+            }
+            catch(Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+                message = ex.Message;
+            }
+            return cp;
+        }
+
+        private bool orderNvod(string _card, string _phone, string productId, string amount, string bankName, string smsCode, string inDate, out string message)
+        {
+            bool addnvod = false;
+            message = string.Empty;
+            _eBarimtRequest ebarimt = new _eBarimtRequest();
+            try
+            {
+                ebarimt.cardNo = _card;
+                ebarimt.channelNo = "6";
+                ebarimt.customerEmail = string.Empty;
+                ebarimt.sendEmail = false;
+                ebarimt.employeeCode = _phone;
+                ebarimt.organization = false;
+                ebarimt.customerNo = string.Empty;
+                var detials = new List<_transactionDetial>();
+                var stock = new _transactionDetial();
+                stock.barCode = "8463100";
+                stock.price = amount;
+                stock.productId = productId;
+                stock.productName = "Kино сан түрээслэх үйлчилгээ";
+                stock.unit = "ш";
+                stock.qty = "1";
+                detials.Add(stock);
+                ebarimt.transaction = detials;
+                string desc = string.Format(@"[Order VOD] Mobile App emerchant {0}", bankName);
+                if (dbconn.chargeAccount(_card, amount, _phone, desc))
+                {
+                    string resMon = string.Empty;
+                    string resEng = string.Empty;
+                    string resCry = string.Empty;
+                    if (dbconn.addNvodByCounter(_card, _phone, inDate, smsCode, productId, out resEng, out resMon, out resCry))
+                    {
+                        addnvod = true;
+                        int sttCode = 0;
+                        string resp = string.Empty;
+                        if (httpWorker.http_POST("http://192.168.10.182:5050/vat/getEBarimt", serializer.Serialize(ebarimt), out sttCode, out resp))
+                        {
+                            _eBarimtResponse mta = serializer.Deserialize<_eBarimtResponse>(resp);
+                            if (mta.isSuccess)
+                            {
+                                //response.mtaResult = new MTAResult { merchantId = mta.merchantId, amount = mta.amount, billId = mta.billId, date = mta.resultDate, loterryNo = mta.lotteryNo, qrData = mta.qrData, tax = mta.cityTax, vat = mta.vat };
+                                //response.resultMessage = "success";
+                                message = "Амжилттай";
+                            }
+                            else
+                            {
+                                message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                            }
+                        }
+                        else
+                        {
+                            message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                        }
+                    }
+                    else
+                    {
+                        message = resMon;
+                    }
+                }
+                else
+                {
+                    message = "Данс цэнэглэхэд алдаа гарлаа";
+                }
+            }
+            catch(Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+                message = ex.Message;
+            }
+            return addnvod;
+        }
+
+        private bool chargeAccount(string _card, string _phone, string amount, string bankName, out string message)
+        {
+            bool ca = false;
+            message = string.Empty;
+            _eBarimtRequest ebarimt = new _eBarimtRequest();
+            try
+            {
+                ebarimt.cardNo = _card;
+                ebarimt.channelNo = "6";
+                ebarimt.customerEmail = string.Empty;
+                ebarimt.sendEmail = false;
+                ebarimt.employeeCode = _phone;
+                ebarimt.organization = false;
+                ebarimt.customerNo = string.Empty;
+                var detials = new List<_transactionDetial>();
+                var stock = new _transactionDetial();
+                stock.barCode = "8463100";
+                stock.price = amount;
+                stock.productId = "8";
+                stock.productName = "Данс цэнэглэх үйлчилгээ";
+                stock.unit = "ш";
+                stock.qty = "1";
+                detials.Add(stock);
+                ebarimt.transaction = detials;
+                string desc = string.Format(@"[Charge Account] Mobile App emerchant {0}", bankName);
+                if (dbconn.chargeAccount(_card, amount, _phone, desc))
+                {
+                    ca = true;
+                    int sttCode = 0;
+                    string resp = string.Empty;
+                    if (httpWorker.http_POST("http://192.168.10.182:5050/vat/getEBarimt", serializer.Serialize(ebarimt), out sttCode, out resp))
+                    {
+                        _eBarimtResponse mta = serializer.Deserialize<_eBarimtResponse>(resp);
+                        if (mta.isSuccess)
+                        {
+                            //response.mtaResult = new MTAResult { merchantId = mta.merchantId, amount = mta.amount, billId = mta.billId, date = mta.resultDate, loterryNo = mta.lotteryNo, qrData = mta.qrData, tax = mta.cityTax, vat = mta.vat };
+                            //response.resultMessage = "success";
+                            message = "Амжилттай";
+                        }
+                        else
+                        {
+                            message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                        }
+
+                    }
+                    else
+                    {
+                        message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                    }
+                }
+                else
+                {
+                    message = "Данс цэнэглэхэд алдаа гарлаа";
+                }
+            }
+            catch(Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+            }
+            return ca;
         }
     }
 }

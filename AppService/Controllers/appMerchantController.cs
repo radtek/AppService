@@ -22,7 +22,12 @@ namespace AppService.Controllers
         private string TAG = "appMerchantController";
         private string dbres = string.Empty;
         JavaScriptSerializer serializer = new JavaScriptSerializer();
-
+        /// <summary>
+        /// App мерчантаар гүйлгээ хийхээс өмнө заавал Invoice ID -г сервис ашиглаж авна.
+        /// requestType: [1001 - cProduct, 1004 - cNvod, 1007 - cAccount, 1010 - cOAccount]
+        /// </summary>
+        /// <param name="requestObj"></param>
+        /// <returns>Test</returns>
         [HttpPost]
         [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<defaultResponseModel>))]
         public async Task<HttpResponseMessage> Post([FromBody] appMerchantRequestModel requestObj)
@@ -160,6 +165,7 @@ namespace AppService.Controllers
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;
+                        LogWriter._error(TAG, dbres);
                     }
                     else
                     {
@@ -184,6 +190,7 @@ namespace AppService.Controllers
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;
+                        LogWriter._error(TAG, dbres);
                     }
                     else
                     {
@@ -204,10 +211,11 @@ namespace AppService.Controllers
             {
                 if (request != null)
                 {
-                    string dbres = dbconn.iDBCommand(appServiceQry.setCAccount(cardNo, phoneNo, token, invoiceNo,  request.amount, request.bankName, "1007"));
+                    string dbres = dbconn.iDBCommand(appServiceQry.setCAccount("1007", cardNo, phoneNo, token, invoiceNo,  request.amount, request.bankName));
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;
+                        LogWriter._error(TAG, dbres);
                     }
                     else
                     {
@@ -228,10 +236,11 @@ namespace AppService.Controllers
             {
                 if (request != null)
                 {
-                    string dbres = dbconn.iDBCommand(appServiceQry.setCAccount(request.cardNo, phoneNo, token, invoiceNo, request.amount, request.bankName, "1010"));
+                    string dbres = dbconn.iDBCommand(appServiceQry.setCAccount("1010", request.cardNo, phoneNo, token, invoiceNo, request.amount, request.bankName));
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;
+                        LogWriter._error(TAG, dbres);
                     }
                     else
                     {

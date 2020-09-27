@@ -249,6 +249,10 @@ namespace AppService.Controllers
                             // others charge Account
                             result = chargeAccount(cardno, phone, amount, bank, out resultMessage);
                             break;
+                        case "1013":
+                            // upgrade Product
+                            result = upgradeProduct(cardno, phone, productid, amount, bank, out resultMessage);
+                            break;
                         default:
                             result = false;
                             resultMessage = "Гүйлгээний төрөл таарсангүй.";
@@ -323,7 +327,7 @@ namespace AppService.Controllers
                 else
                 {
                     cp = false;
-                    message = "Багц сунгахад алдаа гарлаа";
+                    message = "Багц сунгахад алдаа гарлаа. Лавлах: 77771434, 1434";
                 }
             }
             catch(Exception ex)
@@ -395,7 +399,7 @@ namespace AppService.Controllers
                 }
                 else
                 {
-                    message = "Данс цэнэглэхэд алдаа гарлаа";
+                    message = "Данс цэнэглэхэд алдаа гарлаа. Лавлах: 77771434, 1434";
                 }
             }
             catch(Exception ex)
@@ -458,7 +462,7 @@ namespace AppService.Controllers
                 }
                 else
                 {
-                    message = "Данс цэнэглэхэд алдаа гарлаа";
+                    message = "Данс цэнэглэхэд алдаа гарлаа. Лавлах: 77771434, 1434";
                 }
             }
             catch(Exception ex)
@@ -466,6 +470,86 @@ namespace AppService.Controllers
                 LogWriter._error(TAG, ex.Message);
             }
             return ca;
+        }
+        private bool upgradeProduct(string _card, string _phone, string toProductId, string amount, string bankName, out string message)
+        {
+            bool up = false;
+            message = string.Empty;
+            _eBarimtRequest ebarimt = new _eBarimtRequest();
+            try
+            {
+                ebarimt.cardNo = _card;
+                ebarimt.channelNo = "6";
+                ebarimt.customerEmail = string.Empty;
+                ebarimt.sendEmail = false;
+                ebarimt.employeeCode = _phone;
+                ebarimt.organization = false;
+                ebarimt.customerNo = string.Empty;
+                var detials = new List<_transactionDetial>();
+                var stock = new _transactionDetial();
+                stock.barCode = "8463100";
+                stock.price = amount;
+                stock.productId = "8";
+                stock.productName = "Багц ахиулах үйлчилгээ";
+                stock.unit = "ш";
+                stock.qty = "1";
+                detials.Add(stock);
+                ebarimt.transaction = detials;
+                //---
+                localConvertProdcutMdl convProd = new localConvertProdcutMdl();
+                convProd.BranchId = "286";
+                convProd.Channel = "6";
+                convProd.cardNo = _card;
+                convProd.ConvertProduct = toProductId;
+                convProd.Pay_type = "0";
+                convProd.Username = _phone;
+                string convJson = serializer.Serialize(convProd);
+                string localResponse = string.Empty;
+                if (httpUtil.httpCall_POST_local(convJson, "processProduct", out localResponse))
+                {
+                    LogWriter._qPay(TAG, string.Format("[Upgrade Product] Local Service Response: [{0}]", localResponse));
+                    var convObj = serializer.Deserialize<localCheckProductResponse>(localResponse);
+                    if (convObj.issuccess)
+                    {
+                        up = true;
+                        int sttCode = 0;
+                        string resp = string.Empty;
+                        if (httpWorker.http_POST("http://192.168.10.182:5050/vat/getEBarimt", serializer.Serialize(ebarimt), out sttCode, out resp))
+                        {
+                            _eBarimtResponse mta = serializer.Deserialize<_eBarimtResponse>(resp);
+                            if (mta.isSuccess)
+                            {
+                                //response.mtaResult = new MTAResult { merchantId = mta.merchantId, amount = mta.amount, billId = mta.billId, date = mta.resultDate, loterryNo = mta.lotteryNo, qrData = mta.qrData, tax = mta.cityTax, vat = mta.vat };
+                                //response.resultMessage = "success";
+                                message = "Амжилттай";
+                            }
+                            else
+                            {
+                                message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                            }
+
+                        }
+                        else
+                        {
+                            message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                        }
+                    }
+                    else
+                    {
+                        message = "Багц ахиулахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                    }
+                }
+                else
+                {
+                    message = "Багц ахиулахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                }
+
+            }
+            catch(Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+            }
+            return up;
         }
     }
 }

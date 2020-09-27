@@ -241,6 +241,11 @@ MTA_TRANSACTION_ADDITIONAL bb where AA.BILLID = BB.BILL_ID ORDER BY AA.CREATEDAT
             string qry = string.Format("INSERT INTO APP_MERCHANT_PENDING_TRANSACTIONS (REQUEST_TYPE, CARD_NO, PHONE_NO, TOKEN, INVOICE_NO, AMOUNT, BANKNAME) VALUES ('{6}', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}')", card, phone, token, invId, amount, bankName, ssType);
             return qry;
         }
+        public static string setUProductRequest(string card, string phone, string token, string invId, string prodId, string amount, string bankName)
+        {
+            string qry = string.Format("INSERT INTO APP_MERCHANT_PENDING_TRANSACTIONS (REQUEST_TYPE, CARD_NO, PHONE_NO, TOKEN, INVOICE_NO, PRODUCT_ID, AMOUNT, BANKNAME) VALUES ('1013', '{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')", card, phone, token, invId, prodId, amount, bankName);
+            return qry;
+        }
         public static string checkInvTrans(string invoiceNo)
         {
             string qry = string.Format("SELECT ID, REQUEST_TYPE, CARD_NO, PHONE_NO, INVOICE_NO, PRODUCT_ID, MONTH, AMOUNT, BANKNAME, SMSCODE, INDATE FROM APP_MERCHANT_PENDING_TRANSACTIONS WHERE STATUS='P' AND EXPIRE_DATE >=SYSDATE AND INVOICE_NO='{0}'", invoiceNo);

@@ -24,7 +24,7 @@ namespace AppService.Controllers
         JavaScriptSerializer serializer = new JavaScriptSerializer();
         /// <summary>
         /// App мерчантаар гүйлгээ хийхээс өмнө заавал Invoice ID -г сервис ашиглаж авна.
-        /// requestType: [1001 - cProduct, 1004 - cNvod, 1007 - cAccount, 1010 - cOAccount]
+        /// requestType: [1001 - cProduct, 1004 - cNvod, 1007 - cAccount, 1010 - cOAccount, 1013 - uProduct]
         /// </summary>
         /// <param name="requestObj"></param>
         /// <returns>Test</returns>
@@ -111,6 +111,23 @@ namespace AppService.Controllers
                                         response.resultMessage = "can't register";
                                     }
                                     break;
+                                case "1013":
+                                    // upgrade Product
+                                    if(registerUpgradeProductRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.uProduct))
+                                    {
+                                        response.isSuccess = true;
+                                        response.resultCode = HttpStatusCode.OK.ToString();
+                                        response.resultMessage = genInvoice;
+
+                                    }
+                                    else
+                                    {
+                                        response.isSuccess = false;
+                                        response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                        response.resultMessage = "can't register";
+                                    }
+                                    break;
+
                                 default:
                                     response.isSuccess = false;
                                     response.resultCode = HttpStatusCode.NotAcceptable.ToString();
@@ -237,6 +254,32 @@ namespace AppService.Controllers
                 if (request != null)
                 {
                     string dbres = dbconn.iDBCommand(appServiceQry.setCAccount("1010", request.cardNo, phoneNo, token, invoiceNo, request.amount, request.bankName));
+                    if (dbres.Contains("FFFFx["))
+                    {
+                        res = false;
+                        LogWriter._error(TAG, dbres);
+                    }
+                    else
+                    {
+                        res = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+            }
+            return res;
+        }
+
+        private bool registerUpgradeProductRequest(string cardNo, string phoneNo, string token, string invoiceNo, upgradeProductRequest request)
+        {
+            bool res = false;
+            try
+            {
+                if (request != null)
+                {
+                    string dbres = dbconn.iDBCommand(appServiceQry.setUProductRequest(cardNo, phoneNo, token, invoiceNo, request.toProductId, request.amount, request.bankName));
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;

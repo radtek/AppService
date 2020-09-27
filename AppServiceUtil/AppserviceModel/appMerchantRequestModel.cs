@@ -12,6 +12,7 @@ namespace AppServiceUtil.AppserviceModel
     /// 1004 - cNvod
     /// 1007 - cAccount
     /// 1010 - cOAccount
+    /// 1013 - uProduct
     /// </summary>
     public class appMerchantRequestModel
     {
@@ -20,6 +21,7 @@ namespace AppServiceUtil.AppserviceModel
         public virtual orderNvodRequest cNvod { get; set; }
         public virtual chargeAccountRequest cAccount { get; set; }
         public virtual chargeOthersAccountRequest cOAccount { get; set; }
+        public virtual upgradeProductRequest uProduct { get; set; }
 
 
     }
@@ -48,5 +50,11 @@ namespace AppServiceUtil.AppserviceModel
         public virtual string amount { get; set; }
         public virtual string bankName { get; set; }
         public virtual string cardNo { get; set; }
+    }
+    public class upgradeProductRequest
+    {
+        public virtual string amount { get; set; }
+        public virtual string bankName { get; set; }
+        public virtual string toProductId { get; set; }
     }
 }

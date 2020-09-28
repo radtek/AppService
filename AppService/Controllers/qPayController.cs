@@ -98,7 +98,7 @@ namespace AppService.Controllers
                             if (dt.Rows.Count != 0)
                             {
                                 string invId = dt.Rows[0]["STATUS"].ToString();
-                                if (invId == "0")
+                                if (invId == "C")
                                 {
                                     response.isSuccess = true;
                                     response.resultCode = HttpStatusCode.OK.ToString();

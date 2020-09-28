@@ -223,7 +223,7 @@ MTA_TRANSACTION_ADDITIONAL bb where AA.BILLID = BB.BILL_ID ORDER BY AA.CREATEDAT
         }
         public static string getQpayInvoice(string invoiceNo)
         {
-            string qry = string.Format("SELECT INVOICE_NO, STATUS FROM QPAY_INVOICE_STATUS WHERE INVOICE_NO = '{0}'", invoiceNo);
+            string qry = string.Format("SELECT STATUS, CARD_NO FROM APP_MERCHANT_PENDING_TRANSACTIONS WHERE INVOICE_NO = '{0}'", invoiceNo);
             return qry;
         }
         public static string setCProductRequest(string card, string phone, string token, string invId, string prodId, string month, string amount, string bankName)

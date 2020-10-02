@@ -66,37 +66,40 @@ namespace AppService.Controllers
                                 string prodId = item["PRODUCT_ID"].ToString();
                                 string endDate = item["ENDDATE"].ToString();
                                 string orderNo = item["ORDERING"].ToString();
-                                prodObj.productName = prodName;
-                                prodObj.productId = prodId;
-                                prodObj.endDate = endDate;
-                                prodObj.orderingNo = orderNo;
-                                bool ismain = false;
-                                switch(prodId)
+                                if(prodId != "65")
                                 {
-                                    case "28":
-                                        ismain = true;
-                                        break;
-                                    case "27":
-                                        ismain = true;
-                                        break;
-                                    case "29":
-                                        ismain = true;
-                                        break;
-                                    case "73":
-                                        ismain = true;
-                                        break;
-                                    default:
-                                        ismain = false;
-                                        break;
-                                }
-                                prodObj.isMain = ismain;
-                                if(ismain)
-                                {
-                                    prodList.Add(prodObj);
-                                }
-                                else
-                                {
-                                    addProdList.Add(prodObj);
+                                    prodObj.productName = prodName;
+                                    prodObj.productId = prodId;
+                                    prodObj.endDate = endDate;
+                                    prodObj.orderingNo = orderNo;
+                                    bool ismain = false;
+                                    switch (prodId)
+                                    {
+                                        case "28":
+                                            ismain = true;
+                                            break;
+                                        case "27":
+                                            ismain = true;
+                                            break;
+                                        case "29":
+                                            ismain = true;
+                                            break;
+                                        case "73":
+                                            ismain = true;
+                                            break;
+                                        default:
+                                            ismain = false;
+                                            break;
+                                    }
+                                    prodObj.isMain = ismain;
+                                    if (ismain)
+                                    {
+                                        prodList.Add(prodObj);
+                                    }
+                                    else
+                                    {
+                                        addProdList.Add(prodObj);
+                                    }
                                 }
                             }
                             DataTable dtCounter = dbconn.getTable(appServiceQry._getPromoCounters(cardno));

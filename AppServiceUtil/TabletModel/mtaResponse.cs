@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace AppServiceUtil.TabletModel
 {
+    public class defaultResponseModelTablet
+    {
+        public virtual bool isSuccess { get; set; }
+        public virtual string errorCode { get; set; }
+        public virtual string resultMessage { get; set; }
+    }
     public class defaultResponseModelWidthVatTablet
     {
         public virtual bool isSuccess { get; set; }

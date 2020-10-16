@@ -52,6 +52,9 @@ namespace AppService.Controllers
                             comingContent c = new comingContent();
                             c.contentName = item["CONTENT_NAME"].ToString();
                             c.contentImgUrl = item["CONTENT_IMG_URL"].ToString().Replace("192.168.10.93", "my.ddishtv.mn:808");
+                            c.contentDesc = item["CONTENT_DESCR"].ToString();
+                            c.trailer = item["TRAILER"].ToString();
+                            c.contentId = item["ID"].ToString();
                             cnt.Add(c);
                         }
                         response.isSuccess = true;

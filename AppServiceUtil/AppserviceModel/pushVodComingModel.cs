@@ -17,5 +17,8 @@ namespace AppServiceUtil.AppserviceModel
     {
         public virtual string contentName { get; set; }
         public virtual string contentImgUrl { get; set; }
+        public virtual string contentDesc { get; set; }
+        public virtual string trailer { get; set; }
+        public virtual string contentId { get; set; }
     }
 }

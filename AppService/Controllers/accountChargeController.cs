@@ -227,6 +227,93 @@ namespace AppService.Controllers
         }
 
         /// <summary>
+        /// [Unlogin] Бусдын данс цэнэглэхэд Хэрэглэгч шалгах сервис Хэрэглэгчийн овог нууцлагдсан байдлаар илгээгдэнэ.
+        /// </summary>
+        /// <param name="searchValue">Admin or CardNo (mandatory)</param>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("unlogin/{searchValue}")]
+        [SwaggerResponse(HttpStatusCode.OK, Type = typeof(IEnumerable<othersAccountChargeMdl>))]
+        public async Task<HttpResponseMessage> GetUnLogin(string searchValue)
+        {
+            HttpResponseMessage message = null;
+            othersAccountChargeMdl response = new othersAccountChargeMdl();
+            string token = HttpContext.Current.Request.Headers["Authorization"].Replace("Bearer ", "").Trim();
+            string req = string.Format(@"SEARCH VALUE: [{0}]", searchValue);
+            LogWriter._chargeProd(TAG, string.Format(@"[>>] Request: ({0}), ", req));
+            try
+            {
+                if (dbconn.idbCheck(out dbres))
+                {
+                    
+                    if (token == "YGHM9SHBC81LMR4G")
+                    {
+                        DataTable dt = dtS(searchValue);
+                        if (dt.Rows.Count != 0)
+                        {
+                            string isprepaid = dt.Rows[0]["IS_PREPAID"].ToString();
+                            string fName = dt.Rows[0]["SUBSCRIBER_FNAME"].ToString();
+                            string lName = dt.Rows[0]["SUBSCRIBER_LNAME"].ToString();
+                            string card = dt.Rows[0]["CARD_NO"].ToString();
+                            string admin = dt.Rows[0]["PHONE_NO"].ToString();
+                            if (isprepaid != "2")
+                            {
+
+                                response.isSuccess = true;
+                                response.resultCode = HttpStatusCode.OK.ToString();
+                                response.firstName = fName;
+                                response.lastName = convertors.replaceName(lName);
+                                response.cardNo = card;
+                                response.adminNo = admin;
+                                response.resultMessage = "success";
+                            }
+                            else
+                            {
+                                response.isSuccess = false;
+                                response.resultCode = HttpStatusCode.OK.ToString();
+                                response.firstName = fName;
+                                response.lastName = convertors.replaceName(lName);
+                                response.cardNo = card;
+                                response.adminNo = admin;
+                                response.resultMessage = "Дараа төлбөрт хэрэглэгч тул ашиглах боломжгүй.";
+
+                            }
+                        }
+                        else
+                        {
+                            response.isSuccess = false;
+                            response.resultCode = HttpStatusCode.NotFound.ToString();
+                            response.resultMessage = "Хайлтын үр дүн хоосон байна.";
+                        }
+                    }
+                    else
+                    {
+                        response.isSuccess = false;
+                        response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                        response.resultMessage = appConstantValues.MSG_EXPIRED;
+                    }
+                }
+                else
+                {
+                    response.isSuccess = false;
+                    response.resultCode = HttpStatusCode.NotFound.ToString();
+                    response.resultMessage = appConstantValues.MSG_INTERNAL_ERROR;
+                    LogWriter._error(TAG, dbres);
+                }
+            }
+            catch (Exception ex)
+            {
+                response.isSuccess = false;
+                response.resultCode = HttpStatusCode.NotFound.ToString();
+                response.resultMessage = ex.Message;
+                exceptionManager.ManageException(ex, TAG);
+            }
+            message = Request.CreateResponse(HttpStatusCode.OK, response);
+            LogWriter._chargeProd(TAG, string.Format("[<<] IP: [{0}], Response: [{1}], Token: [{2}]", httpUtil.GetClientIPAddress(HttpContext.Current.Request), serializer.Serialize(response), token));
+            return message;
+        }
+
+        /// <summary>
         /// Бусдын данс цэнэглэх сервис. Хэрэглэгч шалгах сервисээс амжилттай хариу ирсэн тохиолдолд ашиглана.
         /// </summary>
         /// <param name="amount">Мөнгөн дүн (mandatory)</param>

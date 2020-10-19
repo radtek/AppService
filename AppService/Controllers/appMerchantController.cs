@@ -43,62 +43,15 @@ namespace AppService.Controllers
                 {
                     if (dbconn.idbCheck(out dbres))
                     {
-                        string userCardNo = string.Empty;
-                        string userAdminNo = string.Empty;
-                        if (dbconn.checkToken(token, out userCardNo, out userAdminNo))
+                        string genInvoice = genInvoice = convertors.generateInvoiceNo("1");
+                        string cType = requestObj.requestType;
+                        if (token== "YGHM9SHBC81LMR4G")
                         {
-                            string genInvoice = genInvoice = convertors.generateInvoiceNo("1");
-                            string cType = requestObj.requestType;
                             switch (cType)
                             {
-                                case "1001":
-                                    // charge Product
-                                    if(registerChargeProductRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cProduct))
-                                    {
-                                        response.isSuccess = true;
-                                        response.resultCode = HttpStatusCode.OK.ToString();
-                                        response.resultMessage = genInvoice;
-                                    }
-                                    else
-                                    {
-                                        response.isSuccess = false;
-                                        response.resultCode = HttpStatusCode.InternalServerError.ToString();
-                                        response.resultMessage = "can't register";
-                                    }
-                                    break;
-                                case "1004":
-                                    // order Nvod
-                                    if (registerOrderNvodRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cNvod))
-                                    {
-                                        response.isSuccess = true;
-                                        response.resultCode = HttpStatusCode.OK.ToString();
-                                        response.resultMessage = genInvoice;
-                                    }
-                                    else
-                                    {
-                                        response.isSuccess = false;
-                                        response.resultCode = HttpStatusCode.InternalServerError.ToString();
-                                        response.resultMessage = "can't register";
-                                    }
-                                    break;
-                                case "1007":
-                                    // charge Account
-                                    if (registerChargeAccountRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cAccount))
-                                    {
-                                        response.isSuccess = true;
-                                        response.resultCode = HttpStatusCode.OK.ToString();
-                                        response.resultMessage = genInvoice;
-                                    }
-                                    else
-                                    {
-                                        response.isSuccess = false;
-                                        response.resultCode = HttpStatusCode.InternalServerError.ToString();
-                                        response.resultMessage = "can't register";
-                                    }
-                                    break;
                                 case "1010":
                                     // charge OthersAccount
-                                    if (registerChargeOthersAccountRequest(userAdminNo, token, genInvoice, requestObj.cOAccount))
+                                    if (registerChargeOthersAccountRequest(genInvoice, token, genInvoice, requestObj.cOAccount))
                                     {
                                         response.isSuccess = true;
                                         response.resultCode = HttpStatusCode.OK.ToString();
@@ -111,23 +64,6 @@ namespace AppService.Controllers
                                         response.resultMessage = "can't register";
                                     }
                                     break;
-                                case "1013":
-                                    // upgrade Product
-                                    if(registerUpgradeProductRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.uProduct))
-                                    {
-                                        response.isSuccess = true;
-                                        response.resultCode = HttpStatusCode.OK.ToString();
-                                        response.resultMessage = genInvoice;
-
-                                    }
-                                    else
-                                    {
-                                        response.isSuccess = false;
-                                        response.resultCode = HttpStatusCode.InternalServerError.ToString();
-                                        response.resultMessage = "can't register";
-                                    }
-                                    break;
-
                                 default:
                                     response.isSuccess = false;
                                     response.resultCode = HttpStatusCode.NotAcceptable.ToString();
@@ -137,9 +73,103 @@ namespace AppService.Controllers
                         }
                         else
                         {
-                            response.isSuccess = false;
-                            response.resultCode = HttpStatusCode.Unauthorized.ToString();
-                            response.resultMessage = appConstantValues.MSG_EXPIRED;
+                            string userCardNo = string.Empty;
+                            string userAdminNo = string.Empty;
+                            if (dbconn.checkToken(token, out userCardNo, out userAdminNo))
+                            {
+                                
+                                switch (cType)
+                                {
+                                    case "1001":
+                                        // charge Product
+                                        if (registerChargeProductRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cProduct))
+                                        {
+                                            response.isSuccess = true;
+                                            response.resultCode = HttpStatusCode.OK.ToString();
+                                            response.resultMessage = genInvoice;
+                                        }
+                                        else
+                                        {
+                                            response.isSuccess = false;
+                                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                            response.resultMessage = "can't register";
+                                        }
+                                        break;
+                                    case "1004":
+                                        // order Nvod
+                                        if (registerOrderNvodRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cNvod))
+                                        {
+                                            response.isSuccess = true;
+                                            response.resultCode = HttpStatusCode.OK.ToString();
+                                            response.resultMessage = genInvoice;
+                                        }
+                                        else
+                                        {
+                                            response.isSuccess = false;
+                                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                            response.resultMessage = "can't register";
+                                        }
+                                        break;
+                                    case "1007":
+                                        // charge Account
+                                        if (registerChargeAccountRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.cAccount))
+                                        {
+                                            response.isSuccess = true;
+                                            response.resultCode = HttpStatusCode.OK.ToString();
+                                            response.resultMessage = genInvoice;
+                                        }
+                                        else
+                                        {
+                                            response.isSuccess = false;
+                                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                            response.resultMessage = "can't register";
+                                        }
+                                        break;
+                                    case "1010":
+                                        // charge OthersAccount
+                                        if (registerChargeOthersAccountRequest(userAdminNo, token, genInvoice, requestObj.cOAccount))
+                                        {
+                                            response.isSuccess = true;
+                                            response.resultCode = HttpStatusCode.OK.ToString();
+                                            response.resultMessage = genInvoice;
+                                        }
+                                        else
+                                        {
+                                            response.isSuccess = false;
+                                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                            response.resultMessage = "can't register";
+                                        }
+                                        break;
+                                    case "1013":
+                                        // upgrade Product
+                                        if (registerUpgradeProductRequest(userCardNo, userAdminNo, token, genInvoice, requestObj.uProduct))
+                                        {
+                                            response.isSuccess = true;
+                                            response.resultCode = HttpStatusCode.OK.ToString();
+                                            response.resultMessage = genInvoice;
+
+                                        }
+                                        else
+                                        {
+                                            response.isSuccess = false;
+                                            response.resultCode = HttpStatusCode.InternalServerError.ToString();
+                                            response.resultMessage = "can't register";
+                                        }
+                                        break;
+
+                                    default:
+                                        response.isSuccess = false;
+                                        response.resultCode = HttpStatusCode.NotAcceptable.ToString();
+                                        response.resultMessage = "invalid request type";
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                response.isSuccess = false;
+                                response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                                response.resultMessage = appConstantValues.MSG_EXPIRED;
+                            }
                         }
                     }
                     else
@@ -271,7 +301,6 @@ namespace AppService.Controllers
             }
             return res;
         }
-
         private bool registerUpgradeProductRequest(string cardNo, string phoneNo, string token, string invoiceNo, upgradeProductRequest request)
         {
             bool res = false;

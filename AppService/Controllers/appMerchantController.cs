@@ -24,7 +24,7 @@ namespace AppService.Controllers
         JavaScriptSerializer serializer = new JavaScriptSerializer();
         /// <summary>
         /// App мерчантаар гүйлгээ хийхээс өмнө заавал Invoice ID -г сервис ашиглаж авна.
-        /// requestType: [1001 - cProduct, 1004 - cNvod, 1007 - cAccount, 1010 - cOAccount, 1013 - uProduct]
+        /// requestType: [1001 - cProduct, 1004 - cNvod, 1007 - cAccount, 1010 - cOAccount, 1013 - uProduct, 1017 - cOAccountNoLogin]
         /// </summary>
         /// <param name="requestObj"></param>
         /// <returns>Test</returns>
@@ -49,9 +49,9 @@ namespace AppService.Controllers
                         {
                             switch (cType)
                             {
-                                case "1010":
-                                    // charge OthersAccount
-                                    if (registerChargeOthersAccountRequest(genInvoice, token, genInvoice, requestObj.cOAccount))
+                                case "1017":
+                                    // charge OthersAccount No Login
+                                    if (registerChargeOthersAccountNoLoginRequest(token, genInvoice, requestObj.cOAccountNoLogin))
                                     {
                                         response.isSuccess = true;
                                         response.resultCode = HttpStatusCode.OK.ToString();
@@ -284,6 +284,32 @@ namespace AppService.Controllers
                 if (request != null)
                 {
                     string dbres = dbconn.iDBCommand(appServiceQry.setCAccount("1010", request.cardNo, phoneNo, token, invoiceNo, request.amount, request.bankName));
+                    if (dbres.Contains("FFFFx["))
+                    {
+                        res = false;
+                        LogWriter._error(TAG, dbres);
+                    }
+                    else
+                    {
+                        res = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+            }
+            return res;
+        }
+        private bool registerChargeOthersAccountNoLoginRequest(string token, string invoiceNo, chargeOthersAccountNoLoginRequest request)
+        {
+            bool res = false;
+            try
+            {
+                if (request != null)
+                {
+                    string isvat = request.isVat ? "0" : "1";
+                    string dbres = dbconn.iDBCommand(appServiceQry.setCAccountNoLogin("1017", request.cardNo, request.deviceImei, token, invoiceNo, request.amount, request.bankName, isvat, request.email));
                     if (dbres.Contains("FFFFx["))
                     {
                         res = false;

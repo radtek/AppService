@@ -21,6 +21,7 @@ namespace AppServiceUtil.AppserviceModel
         public virtual orderNvodRequest cNvod { get; set; }
         public virtual chargeAccountRequest cAccount { get; set; }
         public virtual chargeOthersAccountRequest cOAccount { get; set; }
+        public virtual chargeOthersAccountNoLoginRequest cOAccountNoLogin { get; set; }
         public virtual upgradeProductRequest uProduct { get; set; }
 
 
@@ -50,6 +51,15 @@ namespace AppServiceUtil.AppserviceModel
         public virtual string amount { get; set; }
         public virtual string bankName { get; set; }
         public virtual string cardNo { get; set; }
+    }
+    public class chargeOthersAccountNoLoginRequest
+    {
+        public virtual string amount { get; set; }
+        public virtual string bankName { get; set; }
+        public virtual string cardNo { get; set; }
+        public virtual bool isVat { get; set; }
+        public virtual string email { get; set; }
+        public virtual string deviceImei { get; set; }
     }
     public class upgradeProductRequest
     {

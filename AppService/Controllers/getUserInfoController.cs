@@ -258,7 +258,7 @@ namespace AppService.Controllers
                         if (checkCustomType(userCardNo))
                         {
                             response.isSuccess = true;
-                            response.resultCode = HttpStatusCode.Unauthorized.ToString();
+                            response.resultCode = HttpStatusCode.OK.ToString();
                             response.resultMessage = appConstantValues.MSG_SUCCESS;
                         }
                         else

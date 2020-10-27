@@ -231,6 +231,8 @@ namespace AppService.Controllers
                     string bank = dt.Rows[0]["BANKNAME"].ToString();
                     string smscode = dt.Rows[0]["SMSCODE"].ToString();
                     string indate = dt.Rows[0]["INDATE"].ToString();
+                    string isVat = dt.Rows[0]["ISVAT"].ToString();
+                    string email = dt.Rows[0]["EMAIL_ADDRESS"].ToString();
                     switch (type)
                     {
                         case "1001":
@@ -252,6 +254,10 @@ namespace AppService.Controllers
                         case "1013":
                             // upgrade Product
                             result = upgradeProduct(cardno, phone, productid, amount, bank, out resultMessage);
+                            break;
+                        case "1017":
+                            // others charge Account No Login 
+                            result = chargeAccountNoLogin(cardno, phone, amount, bank, isVat, email, out resultMessage);
                             break;
                         default:
                             result = false;
@@ -466,6 +472,76 @@ namespace AppService.Controllers
                 }
             }
             catch(Exception ex)
+            {
+                LogWriter._error(TAG, ex.Message);
+            }
+            return ca;
+        }
+        private bool chargeAccountNoLogin(string _card, string _phone, string amount, string bankName, string isVat, string email, out string message)
+        {
+            bool ca = false;
+            message = string.Empty;
+            _eBarimtRequest ebarimt = new _eBarimtRequest();
+            try
+            {
+                bool createVat = isVat == "0" ? true : false;
+                ebarimt.cardNo = _card;
+                ebarimt.channelNo = "6";
+                ebarimt.customerEmail = createVat ? email : string.Empty;
+                ebarimt.sendEmail = createVat;
+                ebarimt.employeeCode = _phone;
+                ebarimt.organization = false;
+                ebarimt.customerNo = string.Empty;
+                var detials = new List<_transactionDetial>();
+                var stock = new _transactionDetial();
+                stock.barCode = "8463100";
+                stock.price = amount;
+                stock.productId = "8";
+                stock.productName = "Данс цэнэглэх үйлчилгээ";
+                stock.unit = "ш";
+                stock.qty = "1";
+                detials.Add(stock);
+                ebarimt.transaction = detials;
+                string desc = string.Format(@"[Charge Account] Mobile App emerchant {0}", bankName);
+                if (dbconn.chargeAccount(_card, amount, _phone, desc))
+                {
+                    ca = true;
+                    if (createVat)
+                    {
+                        int sttCode = 0;
+                        string resp = string.Empty;
+                        if (httpWorker.http_POST("http://192.168.10.182:5050/vat/getEBarimt", serializer.Serialize(ebarimt), out sttCode, out resp))
+                        {
+                            _eBarimtResponse mta = serializer.Deserialize<_eBarimtResponse>(resp);
+                            if (mta.isSuccess)
+                            {
+                                //response.mtaResult = new MTAResult { merchantId = mta.merchantId, amount = mta.amount, billId = mta.billId, date = mta.resultDate, loterryNo = mta.lotteryNo, qrData = mta.qrData, tax = mta.cityTax, vat = mta.vat };
+                                //response.resultMessage = "success";
+                                message = "Амжилттай";
+                            }
+                            else
+                            {
+                                message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                            }
+
+                        }
+                        else
+                        {
+                            message = "Ebarimt гаргахад алдаа гарлаа. Лавлах: 77771434, 1434";
+                        }
+                    }
+                    else
+                    {
+                        message = "Амжилттай";
+                    }
+                
+                }
+                else
+                {
+                    message = "Данс цэнэглэхэд алдаа гарлаа. Лавлах: 77771434, 1434";
+                }
+            }
+            catch (Exception ex)
             {
                 LogWriter._error(TAG, ex.Message);
             }
